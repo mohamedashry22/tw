@@ -1,28 +1,31 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 
-const Configuration = sequelize.define(
-  'Configuration',
+const Template = sequelize.define(
+  'Template',
   {
     id: {
-      type: DataTypes.STRING,
-      defaultValue: DataTypes.UUIDV4,
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
       primaryKey: true,
     },
-    key: {
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
-    value: {
+    content: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
   },
   {
-    tableName: 'configurations',
+    tableName: 'templates',
     timestamps: true,
   }
 );
 
-export default Configuration;
+export default Template;

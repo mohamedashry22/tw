@@ -1,0 +1,331 @@
+{
+    "info": {
+      "name": "Twitter API Integration",
+      "_postman_id": "d3fdfc8e-f5a5-4a9f-a6a8-1234567890ab",
+      "description": "Postman collection for all API endpoints of the Twitter API integration application.",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "Authentication",
+        "item": [
+          {
+            "name": "Signup",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123\",\n  \"role\": \"admin\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/auth/signup",
+                "host": ["{{base_url}}"],
+                "path": ["api", "auth", "signup"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Login",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/auth/login",
+                "host": ["{{base_url}}"],
+                "path": ["api", "auth", "login"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Refresh Token",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/auth/refresh-token",
+                "host": ["{{base_url}}"],
+                "path": ["api", "auth", "refresh-token"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Logout",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/auth/logout",
+                "host": ["{{base_url}}"],
+                "path": ["api", "auth", "logout"]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "User Management (Admin Only)",
+        "item": [
+          {
+            "name": "Get All Users",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/users",
+                "host": ["{{base_url}}"],
+                "path": ["api", "users"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Delete User",
+            "request": {
+              "method": "DELETE",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/users/{{user_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "users", "{{user_id}}"]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Configuration Management (Admin Only)",
+        "item": [
+          {
+            "name": "Get All Configurations",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/configuration",
+                "host": ["{{base_url}}"],
+                "path": ["api", "configuration"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Create or Update Configuration",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"key\": \"TWITTER_API_KEY\",\n  \"value\": \"your_api_key\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/configuration",
+                "host": ["{{base_url}}"],
+                "path": ["api", "configuration"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Delete Configuration",
+            "request": {
+              "method": "DELETE",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/configuration/{{key}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "configuration", "{{key}}"]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Twitter Operations",
+        "item": [
+          {
+            "name": "Post a Tweet",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "name": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"status\": \"Hello, Twitter!\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/twitter/tweet",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "tweet"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Retry All Failed Tweets",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/retry-failed-tweets",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "retry-failed-tweets"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Retry Specific Failed Tweet",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/retry-failed-tweet/{{log_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "retry-failed-tweet", "{{log_id}}"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Resend Specific Successful Tweet",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/resend-successful-tweet/{{log_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "resend-successful-tweet", "{{log_id}}"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "List Successful Tweets",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/successful-tweets",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "successful-tweets"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "List Failed Tweets",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/failed-tweets",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "failed-tweets"]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Cron Job Control (Admin Only)",
+        "item": [
+          {
+            "name": "Start Cron Job",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/start-cron",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "start-cron"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Stop Cron Job",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/stop-cron",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "stop-cron"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Check Cron Job Status",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/cron-status",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "cron-status"]
+              }
+            },
+            "response": []
+          }
+        ]
+      }
+    ],
+    "event": [],
+    "variable": [
+      {
+        "key": "base_url",
+        "value": "http://localhost:5000"
+      },
+      {
+        "key": "user_id",
+        "value": ""
+      },
+      {
+        "key": "log_id",
+        "value": ""
+      },
+      {
+        "key": "key",
+        "value": ""
+      }
+    ]
+  }

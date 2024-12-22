@@ -1,29 +1,30 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import createError from 'http-errors';
-import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 
 router.post('/signup', async (req, res, next) => {
   try {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) {
-      throw createError(400, 'Username, email, and password are required');
-    }
+    const { username, email, password, role } = req.body;
 
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
-      throw createError(400, 'Email is already registered');
-    }
-
-    await User.create({
+    const user = await User.create({
       username,
       email,
       passwordHash: password,
+      role: role || 'admin',
     });
 
-    res.status(201).json({ message: 'User created successfully' });
+    res.json({
+      message: 'Signup successful',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -32,51 +33,41 @@ router.post('/signup', async (req, res, next) => {
 router.post('/login', async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      throw createError(400, 'Email and password are required');
-    }
 
     const user = await User.findOne({ where: { email } });
-    if (!user) {
-      throw createError(400, 'Invalid email or password');
-    }
 
-    const isValid = await user.validPassword(password);
-    if (!isValid) {
-      throw createError(400, 'Invalid email or password');
+    if (!user || !(await user.validatePassword(password))) {
+      throw createError(401, 'Invalid email or password');
     }
 
     const accessToken = jwt.sign(
       { userId: user.id },
       process.env.JWT_ACCESS_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: '90d' }
     );
 
     const refreshToken = jwt.sign(
       { userId: user.id },
       process.env.JWT_REFRESH_SECRET,
-      { expiresIn: '90d' } 
+      { expiresIn: '180d' }
     );
 
     res
-      .cookie('accessToken', accessToken, {
-        httpOnly: true,
-        maxAge: 15 * 60 * 1000,
-        sameSite: 'Strict',
-        secure: process.env.NODE_ENV === 'production', 
-      })
-      .cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        maxAge: 90 * 24 * 60 * 60 * 1000, 
-        sameSite: 'Strict',
-        secure: process.env.NODE_ENV === 'production',
-      })
-      .json({ message: 'Login successful' });
+      .cookie('accessToken', accessToken, { httpOnly: true })
+      .cookie('refreshToken', refreshToken, { httpOnly: true })
+      .json({
+        message: 'Login successful',
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+        },
+      });
   } catch (error) {
     next(error);
   }
 });
-
 
 router.post('/refresh-token', async (req, res, next) => {
   try {
@@ -86,50 +77,47 @@ router.post('/refresh-token', async (req, res, next) => {
       throw createError(401, 'Refresh token not found');
     }
 
-    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, payload) => {
+    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, async (err, payload) => {
       if (err) {
-        return next(createError(401, 'Invalid refresh token'));
+        if (err.name === 'TokenExpiredError') {
+          return next(createError(401, 'Refresh token expired'));
+        } else {
+          return next(createError(401, 'Invalid refresh token'));
+        }
       }
 
-      const userId = payload.userId;
+      const user = await User.findByPk(payload.userId);
+      if (!user) {
+        return next(createError(401, 'User not found'));
+      }
 
       const newAccessToken = jwt.sign(
-        { userId },
+        { userId: user.id },
         process.env.JWT_ACCESS_SECRET,
-        { expiresIn: '15m' }
+        { expiresIn: '90d' }
+      );
+
+      const newRefreshToken = jwt.sign(
+        { userId: user.id },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: '180d' }
       );
 
       res
-        .cookie('accessToken', newAccessToken, {
-          httpOnly: true,
-          maxAge: 15 * 60 * 1000,
-          sameSite: 'Strict',
-          secure: process.env.NODE_ENV === 'production',
-        })
-        .json({ message: 'Access token refreshed' });
+        .cookie('accessToken', newAccessToken, { httpOnly: true })
+        .cookie('refreshToken', newRefreshToken, { httpOnly: true })
+        .json({ message: 'Token refreshed successfully' });
     });
   } catch (error) {
     next(error);
   }
 });
 
-router.post('/logout', async (req, res, next) => {
-  try {
-    res
-      .clearCookie('accessToken', {
-        httpOnly: true,
-        sameSite: 'Strict',
-        secure: process.env.NODE_ENV === 'production',
-      })
-      .clearCookie('refreshToken', {
-        httpOnly: true,
-        sameSite: 'Strict',
-        secure: process.env.NODE_ENV === 'production',
-      })
-      .json({ message: 'Logged out successfully' });
-  } catch (error) {
-    next(error);
-  }
+router.post('/logout', async (req, res) => {
+  res
+    .clearCookie('accessToken')
+    .clearCookie('refreshToken')
+    .json({ message: 'Logout successful' });
 });
 
 export default router;

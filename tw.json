@@ -1,0 +1,768 @@
+{
+    "info": {
+      "name": "Twitter API Integration",
+      "_postman_id": "d3fdfc8e-f5a5-4a9f-a6a8-1234567890ab",
+      "description": "Postman collection for all API endpoints of the Twitter API integration application.",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "Authentication",
+        "item": [
+          {
+            "name": "Signup",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123\",\n  \"role\": \"admin\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/auth/signup",
+                "host": ["{{base_url}}"],
+                "path": ["api", "auth", "signup"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Login",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"Password123\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/auth/login",
+                "host": ["{{base_url}}"],
+                "path": ["api", "auth", "login"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Refresh Token",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/auth/refresh-token",
+                "host": ["{{base_url}}"],
+                "path": ["api", "auth", "refresh-token"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Logout",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/auth/logout",
+                "host": ["{{base_url}}"],
+                "path": ["api", "auth", "logout"]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "User Management (Admin Only)",
+        "item": [
+          {
+            "name": "Get All Users",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/users",
+                "host": ["{{base_url}}"],
+                "path": ["api", "users"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Delete User",
+            "request": {
+              "method": "DELETE",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/users/{{user_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "users", "{{user_id}}"]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Configuration Management (Admin Only)",
+        "item": [
+          {
+            "name": "Get All Configurations",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/configuration",
+                "host": ["{{base_url}}"],
+                "path": ["api", "configuration"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Create or Update Configuration",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"key\": \"TWITTER_API_KEY\",\n  \"value\": \"your_api_key\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/configuration",
+                "host": ["{{base_url}}"],
+                "path": ["api", "configuration"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Delete Configuration",
+            "request": {
+              "method": "DELETE",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/configuration/{{key}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "configuration", "{{key}}"]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Twitter Operations",
+        "item": [
+          {
+            "name": "Post a Tweet",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "name": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"status\": \"Hello, Twitter!\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/twitter/tweet",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "tweet"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Retry All Failed Tweets",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/retry-failed-tweets",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "retry-failed-tweets"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Retry Specific Failed Tweet",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/retry-failed-tweet/{{log_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "retry-failed-tweet", "{{log_id}}"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Resend Specific Successful Tweet",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/resend-successful-tweet/{{log_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "resend-successful-tweet", "{{log_id}}"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "List Successful Tweets",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/successful-tweets",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "successful-tweets"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "List Failed Tweets",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/failed-tweets",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "failed-tweets"]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Cron Job Control (Admin Only)",
+        "item": [
+          {
+            "name": "Start Cron Job",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/start-cron",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "start-cron"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Stop Cron Job",
+            "request": {
+              "method": "POST",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/stop-cron",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "stop-cron"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Check Cron Job Status",
+            "request": {
+              "method": "GET",
+              "header": [],
+              "url": {
+                "raw": "{{base_url}}/api/twitter/cron-status",
+                "host": ["{{base_url}}"],
+                "path": ["api", "twitter", "cron-status"]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Webhook Management",
+        "item": [
+          {
+            "name": "List Webhooks",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/webhooks",
+                "host": ["{{base_url}}"],
+                "path": ["api", "webhooks"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Create Webhook",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"New Order Webhook\",\n  \"description\": \"Webhook for new orders\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/webhooks",
+                "host": ["{{base_url}}"],
+                "path": ["api", "webhooks"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Get Webhook",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/webhooks/{{webhook_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "webhooks", "{{webhook_id}}"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Update Webhook",
+            "request": {
+              "method": "PUT",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"Updated Webhook Name\",\n  \"description\": \"Updated description\",\n  \"isActive\": true\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/webhooks/{{webhook_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "webhooks", "{{webhook_id}}"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Delete Webhook",
+            "request": {
+              "method": "DELETE",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/webhooks/{{webhook_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "webhooks", "{{webhook_id}}"]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Template Management",
+        "item": [
+          {
+            "name": "List Templates",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/templates",
+                "host": ["{{base_url}}"],
+                "path": ["api", "templates"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Create Template",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"Thank You Template\",\n  \"content\": \"📢 Thank you, {{first_name}}, for your order #{{order_number}}!\\nItems: {{product_names}}\\nExpected Delivery: {{delivery_date}}\\nWe appreciate your business!\\n#VendorX\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/templates",
+                "host": ["{{base_url}}"],
+                "path": ["api", "templates"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Get Template",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/templates/{{template_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "templates", "{{template_id}}"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Update Template",
+            "request": {
+              "method": "PUT",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"Updated Template Name\",\n  \"content\": \"Updated template content with placeholders\"\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/templates/{{template_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "templates", "{{template_id}}"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Delete Template",
+            "request": {
+              "method": "DELETE",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/templates/{{template_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "templates", "{{template_id}}"]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Mapping Management",
+        "item": [
+          {
+            "name": "List Mappings",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/mappings",
+                "host": ["{{base_url}}"],
+                "path": ["api", "mappings"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Create Mapping",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"webhookId\": {{webhook_id}},\n  \"templateId\": {{template_id}},\n  \"mappingJson\": {\n    \"first_name\": \"customer.first_name\",\n    \"order_number\": \"order.order_number\",\n    \"product_names\": \"order.items[*].product_name\",\n    \"delivery_date\": \"order.estimated_delivery_date\"\n  }\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/mappings",
+                "host": ["{{base_url}}"],
+                "path": ["api", "mappings"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Get Mapping",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/mappings/{{mapping_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "mappings", "{{mapping_id}}"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Update Mapping",
+            "request": {
+              "method": "PUT",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"mappingJson\": {\n    \"first_name\": \"customer.first_name\",\n    \"order_number\": \"order.order_number\",\n    \"product_names\": \"order.items[*].product_name\",\n    \"delivery_date\": \"order.new_estimated_delivery_date\"\n  }\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}/api/mappings/{{mapping_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "mappings", "{{mapping_id}}"]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Delete Mapping",
+            "request": {
+              "method": "DELETE",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{token}}",
+                  "type": "text"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/mappings/{{mapping_id}}",
+                "host": ["{{base_url}}"],
+                "path": ["api", "mappings", "{{mapping_id}}"]
+              }
+            },
+            "response": []
+          }
+        ]
+      },
+      {
+        "name": "Public Webhook Endpoint",
+        "item": [
+          {
+            "name": "Webhook Event",
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"customer\": {\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\"\n  },\n  \"order\": {\n    \"order_number\": \"VX123456\",\n    \"items\": [\n      { \"product_name\": \"Wireless Mouse\" },\n      { \"product_name\": \"Bluetooth Keyboard\" }\n    ],\n    \"estimated_delivery_date\": \"2023-10-25\"\n  }\n}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{base_url}}{{webhook_endpoint_url}}",
+                "host": ["{{base_url}}"],
+                "path": ["{{webhook_endpoint_url}}"]
+              }
+            },
+            "response": []
+          }
+        ]
+      }
+    ],
+    "event": [],
+    "variable": [
+      {
+        "key": "base_url",
+        "value": "http://localhost:5000"
+      },
+      {
+        "key": "user_id",
+        "value": ""
+      },
+      {
+        "key": "log_id",
+        "value": ""
+      },
+      {
+        "key": "key",
+        "value": ""
+      },
+      {
+        "key": "token",
+        "value": ""
+      },
+      {
+        "key": "webhook_id",
+        "value": ""
+      },
+      {
+        "key": "template_id",
+        "value": ""
+      },
+      {
+        "key": "mapping_id",
+        "value": ""
+      },
+      {
+        "key": "webhook_endpoint_url",
+        "value": "/webhook/your_generated_endpoint_url"
+      }
+    ]
+  }

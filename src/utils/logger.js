@@ -1,17 +1,16 @@
-import { createLogger, format, transports } from 'winston';
+import winston from 'winston';
 
-function createCustomLogger(serviceName) {
-  return createLogger({
+export function createLogger(label) {
+  return winston.createLogger({
     level: 'info',
-    format: format.combine(
-      format.label({ label: serviceName }),
-      format.timestamp(),
-      format.printf(({ timestamp, level, message, label }) => {
-        return `${timestamp} [${label}] ${level}: ${message}`;
-      })
+    format: winston.format.combine(
+      winston.format.label({ label }),
+      winston.format.timestamp(),
+      winston.format.printf(
+        ({ timestamp, level, message, label }) =>
+          `${timestamp} [${label}] ${level}: ${message}`
+      )
     ),
-    transports: [new transports.Console()],
+    transports: [new winston.transports.Console()],
   });
 }
-
-export { createCustomLogger as createLogger };
