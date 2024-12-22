@@ -1,0 +1,175 @@
+{
+    "info": {
+      "name": "Twitter API",
+      "_postman_id": "c7e9a8b0-1234-5678-9abc-def012345678",
+      "description": "Postman collection for testing the Twitter API Express.js application.",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "User Signup",
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"testuser@example.com\",\n    \"password\": \"Password123\"\n}"
+          },
+          "url": {
+            "raw": "http://localhost:5000/api/auth/signup",
+            "protocol": "http",
+            "host": ["localhost"],
+            "port": "5000",
+            "path": ["api", "auth", "signup"]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "User Login",
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"Password123\"\n}"
+          },
+          "url": {
+            "raw": "http://localhost:5000/api/auth/login",
+            "protocol": "http",
+            "host": ["localhost"],
+            "port": "5000",
+            "path": ["api", "auth", "login"]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Refresh Access Token",
+        "request": {
+          "method": "POST",
+          "header": [],
+          "url": {
+            "raw": "http://localhost:5000/api/auth/refresh-token",
+            "protocol": "http",
+            "host": ["localhost"],
+            "port": "5000",
+            "path": ["api", "auth", "refresh-token"]
+          },
+          "body": {
+            "mode": "raw",
+            "raw": ""
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Post a Tweet",
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n    \"status\": \"Hello, world!\"\n}"
+          },
+          "url": {
+            "raw": "http://localhost:5000/api/twitter/tweet",
+            "protocol": "http",
+            "host": ["localhost"],
+            "port": "5000",
+            "path": ["api", "twitter", "tweet"]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Logout",
+        "request": {
+          "method": "POST",
+          "header": [],
+          "url": {
+            "raw": "http://localhost:5000/api/auth/logout",
+            "protocol": "http",
+            "host": ["localhost"],
+            "port": "5000",
+            "path": ["api", "auth", "logout"]
+          },
+          "body": {
+            "mode": "raw",
+            "raw": ""
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Get All Configurations",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "http://localhost:5000/api/configurations",
+            "protocol": "http",
+            "host": ["localhost"],
+            "port": "5000",
+            "path": ["api", "configurations"]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Get Configuration by Key",
+        "request": {
+          "method": "GET",
+          "header": [],
+          "url": {
+            "raw": "http://localhost:5000/api/configurations/TWITTER_API_KEY",
+            "protocol": "http",
+            "host": ["localhost"],
+            "port": "5000",
+            "path": ["api", "configurations", "TWITTER_API_KEY"]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Set Configuration",
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n    \"key\": \"TWITTER_API_KEY\",\n    \"value\": \"your_twitter_api_key\"\n}"
+          },
+          "url": {
+            "raw": "http://localhost:5000/api/configurations",
+            "protocol": "http",
+            "host": ["localhost"],
+            "port": "5000",
+            "path": ["api", "configurations"]
+          }
+        },
+        "response": []
+      }
+    ],
+    "protocolProfileBehavior": {}
+  }

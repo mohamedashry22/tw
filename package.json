@@ -1,0 +1,31 @@
+{
+    "name": "twitter-api-integration",
+    "version": "1.0.0",
+    "description": "Express.js application with Twitter API integration, authentication, and configuration management",
+    "main": "src/server.js",
+    "type": "module",
+    "scripts": {
+      "start": "node src/server.js",
+      "dev": "nodemon src/server.js",
+      "test": "jest"
+    },
+    "dependencies": {
+      "bcryptjs": "2.4.3",
+      "cookie-parser": "1.4.7",
+      "dotenv": "16.4.7",
+      "dotenv-safe": "9.1.0",
+      "express": "4.21.2",
+      "jsonwebtoken": "9.0.2",
+      "sequelize": "6.37.5",
+      "sqlite3": "5.1.7",
+      "twitter-api-v2": "1.18.2",
+      "winston": "3.17.0"
+    },
+    "devDependencies": {
+      "jest": "29.7.0",
+      "nodemon": "3.1.9",
+      "supertest": "7.0.0"
+    },
+    "author": "Mohamed Ashry",
+    "license": "MIT"
+  }
