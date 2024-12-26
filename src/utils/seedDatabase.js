@@ -7,7 +7,7 @@ export async function seedDatabase() {
     if (!adminUser) {
       await User.create({
         username: 'admin',
-        email: 'admin@example.com',
+        email: 'admin@admin.com',
         passwordHash: 'admin',
         role: 'admin',
       });
@@ -18,7 +18,7 @@ export async function seedDatabase() {
     if (!normalUser) {
       await User.create({
         username: 'user',
-        email: 'user@example.com',
+        email: 'user@user.com',
         passwordHash: 'user',
         role: 'user',
       });

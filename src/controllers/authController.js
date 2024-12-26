@@ -9,6 +9,7 @@ router.post('/signup', async (req, res, next) => {
   try {
     const { username, email, password, role } = req.body;
 
+    console.log('signup Trace',username, email, password, role )
     const user = await User.create({
       username,
       email,
@@ -26,6 +27,7 @@ router.post('/signup', async (req, res, next) => {
       },
     });
   } catch (error) {
+    console.log('error in signup', error);
     next(error);
   }
 });
