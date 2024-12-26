@@ -20,7 +20,15 @@ dotenv.config();
 const app = express();
 
 app.use(helmet());
-app.use(cors()); 
+const corsOptions = {
+    origin: process.env.FrontendUrl || 'http://localhost:3000',
+    credentials: true,
+    allowedHeaders: 'Content-Type,Authorization',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  };
+  
+  app.use(cors(corsOptions));
+// app.use(cors()); 
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser());

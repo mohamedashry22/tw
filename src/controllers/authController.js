@@ -39,7 +39,7 @@ router.post('/login', async (req, res, next) => {
     if (!user || !(await user.validatePassword(password))) {
       throw createError(401, 'Invalid email or password');
     }
-
+    
     const accessToken = jwt.sign(
       { userId: user.id },
       process.env.JWT_ACCESS_SECRET,
@@ -52,18 +52,28 @@ router.post('/login', async (req, res, next) => {
       { expiresIn: '180d' }
     );
 
+    const thirtyDaysInMilliseconds = 90 * 24 * 60 * 60 * 1000;
+    const nintyDaysInMilliseconds = 180 * 24 * 60 * 60 * 1000;
+
     res
-      .cookie('accessToken', accessToken, { httpOnly: true })
-      .cookie('refreshToken', refreshToken, { httpOnly: true })
-      .json({
-        message: 'Login successful',
-        user: {
+        .status(200)
+        .cookie("accessToken", accessToken, {
+          httpOnly: true,
+          maxAge: thirtyDaysInMilliseconds,
+          express: new Date(Date.now() + 100000),
+        })
+        .cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          maxAge: nintyDaysInMilliseconds,
+          express: new Date(Date.now() + 100000),
+        })
+        .json({ message: "Login successful", user: {
           id: user.id,
           username: user.username,
           email: user.email,
           role: user.role,
-        },
-      });
+        } });
+
   } catch (error) {
     next(error);
   }

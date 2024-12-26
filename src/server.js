@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
 
 (async () => {
   try {
-    await sequelize.sync({ force: false, alter: true });
+    await sequelize.sync({ force: false });
 
     await seedDatabase();
 

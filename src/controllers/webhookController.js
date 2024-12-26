@@ -48,9 +48,10 @@ eventRouter.post('/event/:endpointId', async (req, res, next) => {
 });
 
 async function checkOwnership(req, res, next) {
-  const userId = req.user.id;
+  // const userId = req.user.id;
   const webhook = await Webhook.findByPk(req.params.id);
-  if (!webhook || webhook.userId !== userId) {
+  if (!webhook) {
+    // if (!webhook || webhook.userId !== userId) {
     return res.status(404).json({ message: 'Webhook not found' });
   }
   req.webhook = webhook;
@@ -61,8 +62,9 @@ webhookRouter.use(authMiddleware);
 
 webhookRouter.get('/', async (req, res, next) => {
   try {
-    const userId = req.user.id;
-    const webhooks = await Webhook.findAll({ where: { userId } });
+    // const userId = req.user.id;
+    // const webhooks = await Webhook.findAll({ where: { userId } });
+    const webhooks = await Webhook.findAll();
     res.json(webhooks);
   } catch (error) {
     next(error);

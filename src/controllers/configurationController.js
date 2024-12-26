@@ -33,7 +33,7 @@ router.delete('/:key', authMiddleware, adminMiddleware, async (req, res, next) =
   try {
     const { key } = req.params;
 
-    const result = await Configuration.destroy({ where: { key } });
+    const result = await Configuration.destroy({ where: { id: key } });
 
     if (result === 0) {
       return res.status(404).json({ message: 'Configuration not found' });

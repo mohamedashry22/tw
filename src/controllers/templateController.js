@@ -6,9 +6,10 @@ import Template from '../models/Template.js';
 const router = express.Router();
 
 async function checkOwnership(req, res, next) {
-  const userId = req.user.id;
+  // const userId = req.user.id;
   const template = await Template.findByPk(req.params.id);
-  if (!template || template.userId !== userId) {
+  if (!template) {
+    // if (!template || template.userId !== userId) {
     return res.status(404).json({ message: 'Template not found' });
   }
   req.template = template;
@@ -17,8 +18,8 @@ async function checkOwnership(req, res, next) {
 
 router.get('/', authMiddleware, async (req, res, next) => {
   try {
-    const userId = req.user.id;
-    const templates = await Template.findAll({ where: { userId } });
+    // const userId = req.user.id;
+    const templates = await Template.findAll();
     res.json(templates);
   } catch (error) {
     next(error);

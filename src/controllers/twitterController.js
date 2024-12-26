@@ -185,16 +185,18 @@ router.post('/resend-successful-tweet/:id', authMiddleware, async (req, res, nex
   try {
     const userId = req.user.id;
     const logId = req.params.id;
-
+    console.log('ashrylogid',logId );
     const successfulTweet = await Log.findOne({
-      where: { id: logId, userId, type: 'success' },
+      where: { id: logId, type: 'success' },
     });
+
 
     if (!successfulTweet) {
       return res.status(404).json({ message: 'Successful tweet not found' });
     }
 
     try {
+      console.log('successfulTweetashrysuccessfulTweet.status',successfulTweet.status );
       const tweetData = await twitterService.postTweet(successfulTweet.status);
 
       await Log.create({
@@ -209,16 +211,16 @@ router.post('/resend-successful-tweet/:id', authMiddleware, async (req, res, nex
         tweetData,
       });
     } catch (error) {
-      await Log.create({
-        status: successfulTweet.status,
-        type: 'failure',
-        errorMessage: error.message,
-        errorCode: error.code,
-        userId,
-        retryCount: 0,
-        lastAttemptedAt: new Date(),
-      });
-
+      // await Log.create({
+      //   status: successfulTweet.status,
+      //   type: 'failure',
+      //   errorMessage: error.message,
+      //   errorCode: error.code,
+      //   userId,
+      //   retryCount: 0,
+      //   lastAttemptedAt: new Date(),
+      // });
+      console.log(error);
       res.status(500).json({
         message: 'Failed to resend tweet',
         error: error.message,
@@ -231,10 +233,11 @@ router.post('/resend-successful-tweet/:id', authMiddleware, async (req, res, nex
 
 router.get('/successful-tweets', authMiddleware, async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    // const userId = req.user.id;
 
     const successfulTweets = await Log.findAll({
-      where: { userId, type: 'success' },
+      // where: { userId, type: 'success' },
+      where: { type: 'success' },
     });
 
     res.json(successfulTweets);

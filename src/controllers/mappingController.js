@@ -7,19 +7,19 @@ const { Mapping, Webhook, Template } = db;
 const router = express.Router();
 
 async function checkOwnership(req, res, next) {
-  const userId = req.user.id;
+  // const userId = req.user.id;
   try {
     const mapping = await Mapping.findByPk(req.params.id, {
       include: [
         {
           model: Webhook,
           as: 'webhook',
-          where: { userId },
+          // where: { userId },
         },
         {
           model: Template,
           as: 'template',
-          where: { userId },
+          // where: { userId },
         },
       ],
     });
@@ -35,18 +35,18 @@ async function checkOwnership(req, res, next) {
 
 router.get('/', authMiddleware, async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    // const userId = req.user.id;
     const mappings = await Mapping.findAll({
       include: [
         {
           model: Webhook,
           as: 'webhook',
-          where: { userId },
+          // where: { userId },
         },
         {
           model: Template,
           as: 'template',
-          where: { userId },
+          // where: { userId },
         },
       ],
     });
@@ -61,8 +61,12 @@ router.post('/', authMiddleware, async (req, res, next) => {
     const userId = req.user.id;
     const { webhookId, templateId, mappingJson } = req.body;
 
-    const webhook = await Webhook.findOne({ where: { id: webhookId, userId } });
-    const template = await Template.findOne({ where: { id: templateId, userId } });
+    console.log("ashry", webhookId,templateId,mappingJson);
+
+    // const webhook = await Webhook.findOne({ where: { id: webhookId, userId } });
+    const webhook = await Webhook.findOne({ where: { id: webhookId } });
+    // const template = await Template.findOne({ where: { id: templateId, userId } });
+    const template = await Template.findOne({ where: { id: templateId } });
 
     if (!webhook || !template) {
       return res.status(400).json({ message: 'Invalid webhook or template' });
@@ -87,6 +91,7 @@ router.get('/:id', authMiddleware, checkOwnership, async (req, res) => {
 router.put('/:id', authMiddleware, checkOwnership, async (req, res, next) => {
   try {
     const { mappingJson } = req.body;
+    console.log('mappingJsonmappingJson', mappingJson)
     await req.mapping.update({ mappingJson: JSON.stringify(mappingJson) });
     res.json(req.mapping);
   } catch (error) {

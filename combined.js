@@ -1336,15 +1336,15 @@ dotenv.config();
 import app from './app.js';
 import sequelize from './config/database.js';
 import twitterService from './services/twitterService.js';
-import { seedDatabase } from './utils/seedDatabase.js';
+// import { seedDatabase } from './utils/seedDatabase.js';
 
 const PORT = process.env.PORT || 5000;
 
 (async () => {
   try {
-    await sequelize.sync({ force: false, alter: true });
+    await sequelize.sync({ force: true, alter: true });
 
-    await seedDatabase();
+    // await seedDatabase();
 
     await twitterService.initialize();
 

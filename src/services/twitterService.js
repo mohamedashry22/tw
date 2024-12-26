@@ -101,6 +101,7 @@ class TwitterService {
       logger.info(`Tweet posted successfully: ${data.id}`);
       return data;
     } catch (error) {
+      console.log('ashryLOgerror',error);
       logger.error('Error posting tweet', error);
 
       if (
