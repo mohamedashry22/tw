@@ -90,11 +90,8 @@ class TwitterService {
   }
 
   async postTweet(status) {
-    if (!this.twitterClient) {
-      throw new Error('TwitterService is not initialized.');
-    }
-
     try {
+      await this.initialize();
       const { data } = await limiter.schedule(() =>
         this.twitterClient.v2.tweet(status)
       );

@@ -75,19 +75,20 @@ router.post('/tweet', authMiddleware, async (req, res, next) => {
 
 router.post('/retry-failed-tweets', authMiddleware, async (req, res, next) => {
   try {
+    console.log('retry-failed-tweet enter method');
     const userId = req.user.id;
 
     const failedTweets = await Log.findAll({
-      where: { userId, type: 'failure' },
+      where: {  type: 'failure' },
     });
 
     const results = [];
-
+    console.log('retry-failed-tweet-count' ,failedTweets.length);
     for (const failedTweet of failedTweets) {
       const MAX_RETRIES = 5;
-      if (failedTweet.retryCount >= MAX_RETRIES) {
-        continue;
-      }
+      // if (failedTweet.retryCount >= MAX_RETRIES) {
+      //   continue;
+      // }
 
       try {
         const tweetData = await twitterService.postTweet(failedTweet.status);
@@ -106,6 +107,7 @@ router.post('/retry-failed-tweets', authMiddleware, async (req, res, next) => {
           logId: failedTweet.id,
         });
       } catch (error) {
+        console.log('error upd', error);
         await failedTweet.update({
           errorMessage: error.message,
           errorCode: error.code,
@@ -126,6 +128,7 @@ router.post('/retry-failed-tweets', authMiddleware, async (req, res, next) => {
       results,
     });
   } catch (error) {
+    console.log('ashryError', error);
     next(error);
   }
 });

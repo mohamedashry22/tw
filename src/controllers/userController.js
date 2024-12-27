@@ -19,7 +19,7 @@ router.get('/', authMiddleware, adminMiddleware, async (req, res, next) => {
 router.delete('/:id', authMiddleware, adminMiddleware, async (req, res, next) => {
   try {
     const { id } = req.params;
-
+    console.log('ashry', id);
     const result = await User.destroy({ where: { id } });
 
     if (result === 0) {
