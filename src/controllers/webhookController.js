@@ -2,9 +2,9 @@
 import express from 'express';
 import authMiddleware from '../middlewares/authMiddleware.js';
 import Webhook from '../models/Webhook.js';
+import EventData from '../models/Event.js';
 import { v4 as uuidv4 } from 'uuid';
 import twitterService from '../services/twitterService.js';
-import jsonpath from 'jsonpath';
 
 // import { extractData } from '../utils/dataExtractor.js';
 // import { renderTemplate } from '../utils/templateRenderer.js';
@@ -34,8 +34,41 @@ export function webhookToJson(message) {
 }
 
 
-export function extractData(eventData, mappingJson) {
+// Global variable to hold the overall price increase percentage
+let overallPriceIncreasePercentage = 0;
+
+export async function extractData(eventData, mappingJson) {
   const parsedData = webhookToJson(eventData);
+
+  // Find existing events with the same eventName
+  const existingEvents = await EventData.findAll({ where: { eventName: parsedData.nameId } });
+
+  // Create a new event with the same eventName
+  const eventToCreate = await EventData.create({
+    data: eventData,
+    eventName: parsedData.nameId,
+  });
+
+  // Perform calculations between the new event and existing events
+  const newEventPrice = parsedData.price;
+  let totalPriceIncrease = 0;
+  let priceDifferencesCount = 0;
+
+  // Calculate the percentage price increase between the new event and each existing event
+  existingEvents.forEach(event => {
+    const oldEventPrice = event.data.price; // Assuming 'data' contains price
+    if (oldEventPrice > 0) {
+      const priceIncrease = ((newEventPrice - oldEventPrice) / oldEventPrice) * 100; // Percentage increase
+      totalPriceIncrease += priceIncrease;
+      priceDifferencesCount++;
+    }
+  });
+
+  // Calculate the average price increase percentage
+  if (priceDifferencesCount > 0) {
+    overallPriceIncreasePercentage = totalPriceIncrease / priceDifferencesCount;
+  }
+
   const result = {};
 
   // Create the strategy object structure
@@ -50,7 +83,7 @@ export function extractData(eventData, mappingJson) {
       basecurrency: parsedData.symbol
     },
     ticker: parsedData.ticker,
-    close: parsedData.price,
+    close: newEventPrice,
     interval: parsedData.timeframe
   };
 
@@ -61,6 +94,9 @@ export function extractData(eventData, mappingJson) {
     let value = path.split('.').reduce((obj, key) => obj?.[key], strategyData);
     result[path] = value;
   }
+
+  // Return the result and the global variable with the calculated price increase percentage
+  result.priceIncreasePercentage = overallPriceIncreasePercentage;
 
   return result;
 }
@@ -82,11 +118,10 @@ export function renderTemplate(template, data) {
 }
 
 
-
 eventRouter.post('/event/:endpointId', async (req, res, next) => {
   try {
     const { endpointId } = req.params;
-    
+    overallPriceIncreasePercentage = 0;
     console.log('Received webhook for endpoint:', endpointId);
     
     const webhook = await Webhook.findOne({
@@ -99,6 +134,7 @@ eventRouter.post('/event/:endpointId', async (req, res, next) => {
 
     // For this example, assuming the eventData is a string
     const eventData = req.body.message;
+
     console.log('Received event data:', eventData);
 
     const mappings = await webhook.getMappings();
@@ -110,12 +146,13 @@ eventRouter.post('/event/:endpointId', async (req, res, next) => {
       
       console.log('Using mapping:', mappingJson);
       
-      const extractedData = extractData(eventData, mappingJson);
+      const extractedData = await extractData(eventData, mappingJson);
       console.log('Extracted data:', extractedData);
       
       let tweetContent = renderTemplate(template.content, extractedData);
       console.log('Generated tweet:', tweetContent);
       tweetContent = tweetContent.replace(/\\n/g, '\n');
+      console.log('overallPriceIncreasePercentage', overallPriceIncreasePercentage);
       await twitterService.postTweet(tweetContent);
     }
 

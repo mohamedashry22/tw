@@ -5,6 +5,7 @@ import User from './User.js';
 import Webhook from './Webhook.js';
 import Template from './Template.js';
 import Mapping from './Mapping.js';
+import EventData from './Event.js';
 
 import applyAssociations from './associations.js';
 import Log from './Log.js';
@@ -17,7 +18,8 @@ const db = {
   Webhook,
   Template,
   Mapping,
-  Log
+  Log,
+  EventData
 };
 
 export default db;
