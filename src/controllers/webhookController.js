@@ -4,18 +4,91 @@ import authMiddleware from '../middlewares/authMiddleware.js';
 import Webhook from '../models/Webhook.js';
 import { v4 as uuidv4 } from 'uuid';
 import twitterService from '../services/twitterService.js';
-import { extractData } from '../utils/dataExtractor.js';
-import { renderTemplate } from '../utils/templateRenderer.js';
+import jsonpath from 'jsonpath';
+
+// import { extractData } from '../utils/dataExtractor.js';
+// import { renderTemplate } from '../utils/templateRenderer.js';
 
 const webhookRouter = express.Router();
 const eventRouter = express.Router(); 
 
+
+export function webhookToJson(message) {
+  const nameIdMatch = message.match(/^([^:]+):/); // Matches the part before the colon
+  const actionMatch = message.match(/order (\w+)/); // Matches "buy" or "sell"
+  const contractsMatch = message.match(/order \w+ ([\d.]+)/); // Matches the number after "order action"
+  const tickerMatch = message.match(/filled on ([^\s.]+)/); // Matches the part after "filled on"
+  const symbolMatch = message.match(/Symbol = (\w+)/); // Matches the symbol after "Symbol ="
+  const priceMatch = message.match(/price = ([\d.]+)/); // Matches the price after "price ="
+  const timeframeMatch = message.match(/Timefame\s*=?\s*(\d+)/); // Matches the timeframe, allowing for optional "="
+
+  return {
+    nameId: nameIdMatch?.[1].trim() || null,
+    action: actionMatch?.[1] || null,
+    contracts: contractsMatch ? parseFloat(contractsMatch[1]) : null,
+    ticker: tickerMatch?.[1] || null,
+    symbol: symbolMatch?.[1] || null,
+    price: priceMatch ? parseFloat(priceMatch[1]) : null,
+    timeframe: timeframeMatch?.[1] ? parseInt(timeframeMatch[1], 10) : null,
+  };
+}
+
+
+export function extractData(eventData, mappingJson) {
+  const parsedData = webhookToJson(eventData);
+  const result = {};
+
+  // Create the strategy object structure
+  const strategyData = {
+    strategy: {
+      order: {
+        action: parsedData.action,
+        contracts: parsedData.contracts
+      }
+    },
+    syminfo: {
+      basecurrency: parsedData.symbol
+    },
+    ticker: parsedData.ticker,
+    close: parsedData.price,
+    interval: parsedData.timeframe
+  };
+
+  mappingJson = JSON.parse(mappingJson);
+
+  // Map the data according to mappingJson
+  for (const [key, path] of Object.entries(mappingJson)) {
+    let value = path.split('.').reduce((obj, key) => obj?.[key], strategyData);
+    result[path] = value;
+  }
+
+  return result;
+}
+
+// export function renderTemplate(template, data) {
+//   return template.replace(/\{\{([^}]+)\}\}/g, (match, path) => {
+//     const value = path.split('.').reduce((obj, key) => obj?.[key], data);
+//     return value !== undefined ? value : match;
+//   });
+// }
+
+export function renderTemplate(template, data) {
+  return template.replace(/{{\s*([\w.]+)\s*}}/g, (_, key) => {
+    // Use jsonpath to resolve the key
+    const results = [data[key]];
+    // jsonpath.query returns an array, use the first value if found
+    return results.length ? results[0] : `{{${key}}}`;
+  });
+}
+
+
+
 eventRouter.post('/event/:endpointId', async (req, res, next) => {
   try {
     const { endpointId } = req.params;
-
-    console.log(endpointId);
-
+    
+    console.log('Received webhook for endpoint:', endpointId);
+    
     const webhook = await Webhook.findOne({
       where: { endpointUrl: endpointId, isActive: true },
     });
@@ -24,28 +97,35 @@ eventRouter.post('/event/:endpointId', async (req, res, next) => {
       return res.status(404).json({ message: 'Webhook endpoint not found or inactive' });
     }
 
-    const eventData = req.body;
+    // For this example, assuming the eventData is a string
+    const eventData = req.body.message;
+    console.log('Received event data:', eventData);
 
     const mappings = await webhook.getMappings();
+    console.log(`Processing ${mappings.length} mappings`);
 
     for (const mapping of mappings) {
       const template = await mapping.getTemplate();
-
       const mappingJson = JSON.parse(mapping.mappingJson);
-
+      
+      console.log('Using mapping:', mappingJson);
+      
       const extractedData = extractData(eventData, mappingJson);
-
-      const tweetContent = renderTemplate(template.content, extractedData);
-
+      console.log('Extracted data:', extractedData);
+      
+      let tweetContent = renderTemplate(template.content, extractedData);
+      console.log('Generated tweet:', tweetContent);
+      tweetContent = tweetContent.replace(/\\n/g, '\n');
       await twitterService.postTweet(tweetContent);
     }
 
-    res.json({ message: 'Webhook event processed' });
+    res.json({ message: 'Webhook event processed successfully' });
   } catch (error) {
     console.error('Error processing webhook event:', error);
     next(error);
   }
 });
+
 
 async function checkOwnership(req, res, next) {
   // const userId = req.user.id;
