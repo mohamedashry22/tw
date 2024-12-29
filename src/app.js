@@ -12,7 +12,7 @@ import twitterController from './controllers/twitterController.js';
 import { webhookRouter, eventRouter } from './controllers/webhookController.js';
 import templateController from './controllers/templateController.js';
 import mappingController from './controllers/mappingController.js';
-import eventController from './controllers/EventController.js';
+// import eventController from './controllers/EventController.js';
 
 import errorMiddleware from './middlewares/errorMiddleware.js';
 
@@ -42,7 +42,7 @@ app.use('/api/twitter', twitterController);
 app.use('/api/webhooks', webhookRouter);
 app.use('/api/templates', templateController);
 app.use('/api/mappings', mappingController);
-app.use('/api/eventData', eventController);
+// app.use('/api/eventData', eventController);
 
 app.use(errorMiddleware);
 
