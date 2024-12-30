@@ -83,14 +83,14 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
         overallPriceIncreasePercentage = 0;
       }
     
-      let formattedProfitLoss = '0%';
+      let formattedProfitLoss = '+0.00%';
       if (overallPriceIncreasePercentage !== 0) {
         const sign = overallPriceIncreasePercentage > 0 ? '+' : '';
         formattedProfitLoss = `${sign}${overallPriceIncreasePercentage.toFixed(2)}%`;
       }
 
       let templateContent = template.content;
-      if (overallPriceIncreasePercentage !== 0) {
+      if (existingEvents.length > 0) {
         console.log("it goes with profitLoss.");
         extractedData.profitLoss = formattedProfitLoss;
         templateContent = template.contentClose;
