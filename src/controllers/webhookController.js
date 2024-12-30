@@ -5,6 +5,7 @@ import Webhook from '../models/Webhook.js';
 import EventData from '../models/Event.js';
 import { v4 as uuidv4 } from 'uuid';
 import twitterService from '../services/twitterService.js';
+import { doesMessageMatchTemplate, parseAlertMessage, replaceTokens } from '../utils/parser.js';
 
 // import { extractData } from '../utils/dataExtractor.js';
 // import { renderTemplate } from '../utils/templateRenderer.js';
@@ -13,137 +14,8 @@ const webhookRouter = express.Router();
 const eventRouter = express.Router(); 
 
 
-export function webhookToJson(message) {
-  const nameIdMatch = message.match(/^([^:]+):/); // Matches the part before the colon
-  const actionMatch = message.match(/order (\w+)/); // Matches "buy" or "sell"
-  const contractsMatch = message.match(/order \w+ ([\d.]+)/); // Matches the number after "order action"
-  const tickerMatch = message.match(/filled on ([^\s.]+)/); // Matches the part after "filled on"
-  const symbolMatch = message.match(/Symbol = (\w+)/); // Matches the symbol after "Symbol ="
-  const priceMatch = message.match(/price = ([\d.]+)/); // Matches the price after "price ="
-  const timeframeMatch = message.match(/Timefame\s*=?\s*(\d+)/); // Matches the timeframe, allowing for optional "="
-
-  return {
-    nameId: nameIdMatch?.[1].trim() || null,
-    action: actionMatch?.[1] || null,
-    contracts: contractsMatch ? parseFloat(contractsMatch[1]) : null,
-    ticker: tickerMatch?.[1] || null,
-    symbol: symbolMatch?.[1] || null,
-    price: priceMatch ? parseFloat(priceMatch[1]) : null,
-    timeframe: timeframeMatch?.[1] ? parseInt(timeframeMatch[1], 10) : null,
-  };
-}
-
-
-export async function extractData(eventData, mappingJson) {
-  let overallPriceIncreasePercentage = 0;
-  const parsedData = webhookToJson(eventData);
-
-  const existingEvents = await EventData.findAll({ where: { eventName: parsedData.nameId } });
-
-  await EventData.create({
-    data: eventData,
-    eventName: parsedData.nameId,
-    price: parsedData.price,
-  });
-
-  const newEventPrice = parsedData.price;
-  let totalPriceIncrease = 0;
-  let priceDifferencesCount = 0;
-
-  existingEvents.forEach((event) => {
-    const oldEventPrice = event.price;
-    if (oldEventPrice > 0) {
-      const priceIncrease = ((newEventPrice - oldEventPrice) / oldEventPrice) * 100;
-      totalPriceIncrease += priceIncrease;
-      priceDifferencesCount++;
-    }
-  });
-
-  if (priceDifferencesCount > 0) {
-    overallPriceIncreasePercentage = totalPriceIncrease / priceDifferencesCount;
-  } else {
-    overallPriceIncreasePercentage = 0;
-  }
-
-  let formattedProfitLoss = '0%';
-  if (overallPriceIncreasePercentage !== 0) {
-    const sign = overallPriceIncreasePercentage > 0 ? '+' : '';
-    formattedProfitLoss = `${sign}${overallPriceIncreasePercentage.toFixed(2)}%`;
-  }
-
-  const strategyData = {
-    strategy: {
-      order: {
-        action: parsedData.action,
-        contracts: parsedData.contracts,
-      },
-    },
-    syminfo: {
-      basecurrency: parsedData.symbol,
-    },
-    ticker: parsedData.ticker,
-    close: newEventPrice,
-    interval: parsedData.timeframe,
-    profitLoss: formattedProfitLoss,
-  };
-
-  mappingJson = JSON.parse(mappingJson);
-
-  if (overallPriceIncreasePercentage !== 0) {
-    mappingJson.profitLoss = 'profitLoss';
-  }
-
-  const result = {};
-
-  for (const [key, path] of Object.entries(mappingJson)) {
-    let value = path.split('.').reduce((obj, key) => obj?.[key], strategyData);
-    result[key] = value;
-  }
-
-  return result;
-}
-
-
-function replaceTokens(content, extractedData, mappingJSON) {
-  let mappingObj = JSON.parse(mappingJSON);
-
-  if (extractedData.profitLoss !== 0) {
-    mappingObj.profitLoss = 'profitLoss';
-  }
-
-  function escapeRegExp(string) {
-    return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
-  }
-
-  for (let mappingKey in mappingObj) {
-    let mappingValue = mappingObj[mappingKey];
-
-    let token = '{{' + mappingValue + '}}';
-
-    let value = extractedData[mappingKey];
-
-    if (value === undefined) {
-      console.warn('No value for key', mappingKey);
-      continue;
-    }
-
-    let valueStr = value.toString();
-
-    let regex = new RegExp(escapeRegExp(token), 'g');
-
-    content = content.replace(regex, valueStr);
-  }
-
-  return content;
-}
-
-
-
 eventRouter.post('/:endpointId', async (req, res, next) => {
   try {
-
-    
-
     const { endpointId } = req.params;
     console.log('Received webhook for endpoint:', endpointId);
 
@@ -167,20 +39,65 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
       const mappingJson = JSON.parse(mapping.mappingJson);
       
       console.log('Using mapping:', mappingJson);
-      
-      const extractedData = await extractData(eventData, mappingJson);
-      console.log('Extracted data:', extractedData);
+
+      if (!doesMessageMatchTemplate(mapping.alert, mapping.alertToken, JSON.parse(mapping.mappingJson))) {
+        console.error('Message does not match the template for mapping:', mapping);
+        return res.status(400).json({ message: 'Alert Message does not match the Alert Token, check spaces, alert token must have {{nameId}}' });
+      }
+
+      const extractedData = parseAlertMessage(
+        mapping.alert,
+        mapping.alertToken,
+        JSON.parse(mapping.mappingJson),
+      );
+
+      console.log('finalContent' , extractedData)
+
+      let existingEvents = [];
+      if (extractedData.nameId) {
+        existingEvents = await EventData.findAll({ where: { eventName: extractedData.nameId } });
+        await EventData.create({
+          data: eventData,
+          eventName: extractedData.nameId,
+          price: extractedData.close || extractedData.price,
+        });
+      }      
+
+      const newEventPrice = extractedData.close || extractedData.price;
+      let totalPriceIncrease = 0;
+      let priceDifferencesCount = 0;
+      let overallPriceIncreasePercentage = 0;
+
+      existingEvents.forEach((event) => {
+        const oldEventPrice = event.price;
+        if (oldEventPrice > 0) {
+          const priceIncrease = ((newEventPrice - oldEventPrice) / oldEventPrice) * 100;
+          totalPriceIncrease += priceIncrease;
+          priceDifferencesCount++;
+        }
+      });
+    
+      if (priceDifferencesCount > 0) {
+        overallPriceIncreasePercentage = totalPriceIncrease / priceDifferencesCount;
+      } else {
+        overallPriceIncreasePercentage = 0;
+      }
+    
+      let formattedProfitLoss = '0%';
+      if (overallPriceIncreasePercentage !== 0) {
+        const sign = overallPriceIncreasePercentage > 0 ? '+' : '';
+        formattedProfitLoss = `${sign}${overallPriceIncreasePercentage.toFixed(2)}%`;
+      }
 
       let templateContent = template.content;
-        if ( extractedData.profitLoss)         
-        {
-          console.log("it goes with profitLoss.");
-          templateContent = template.contentClose;
-        } else {
-          console.log("it goes without profitLoss.");
-        }
+      if (overallPriceIncreasePercentage !== 0) {
+        console.log("it goes with profitLoss.");
+        extractedData.profitLoss = formattedProfitLoss;
+        templateContent = template.contentClose;
+      }
       
-      let tweetContent = replaceTokens(templateContent, extractedData, mappingJson);
+     const tweetContent = replaceTokens(templateContent, extractedData);
+
       console.log('Generated tweet:', tweetContent);
       tweetContent = tweetContent.replace(/\\n/g, '\n');
       await twitterService.postTweet(tweetContent, webhook.userId, {
