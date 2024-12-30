@@ -29,7 +29,7 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
 
     const eventData = req.body.message;
 
-    console.log('Received event data:', eventData);
+    console.log('Received event data:upd', eventData);
 
     const mappings = await webhook.getMappings();
     console.log(`Processing ${mappings.length} mappings`);
@@ -46,7 +46,7 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
       }
 
       const extractedData = parseAlertMessage(
-        mapping.alert,
+        eventData,
         mapping.alertToken,
         JSON.parse(mapping.mappingJson),
       );
