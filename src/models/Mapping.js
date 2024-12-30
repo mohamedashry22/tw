@@ -21,6 +21,14 @@ const Mapping = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    alert: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    alertToken: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
   },
   {
     tableName: 'mappings',

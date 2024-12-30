@@ -29,12 +29,13 @@ router.get('/', authMiddleware, async (req, res, next) => {
 router.post('/', authMiddleware, async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { name, content } = req.body;
+    const { name, content, contentClose } = req.body;
 
     const template = await Template.create({
       userId,
       name,
       content,
+      contentClose
     });
 
     res.status(201).json(template);
@@ -49,8 +50,8 @@ router.get('/:id', authMiddleware, checkOwnership, async (req, res) => {
 
 router.put('/:id', authMiddleware, checkOwnership, async (req, res, next) => {
   try {
-    const { name, content } = req.body;
-    await req.template.update({ name, content });
+    const { name, content, contentClose } = req.body;
+    await req.template.update({ name, content , contentClose});
     res.json(req.template);
   } catch (error) {
     next(error);

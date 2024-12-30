@@ -21,6 +21,10 @@ const Template = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    contentClose: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
   },
   {
     tableName: 'templates',

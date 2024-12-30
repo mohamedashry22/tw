@@ -12,7 +12,6 @@ import twitterController from './controllers/twitterController.js';
 import { webhookRouter, eventRouter } from './controllers/webhookController.js';
 import templateController from './controllers/templateController.js';
 import mappingController from './controllers/mappingController.js';
-// import eventController from './controllers/EventController.js';
 
 import errorMiddleware from './middlewares/errorMiddleware.js';
 
@@ -22,14 +21,16 @@ const app = express();
 
 app.use(helmet());
 const corsOptions = {
-    origin: 'http://45.32.135.95:3000',
-    credentials: true,
-    allowedHeaders: 'Content-Type,Authorization',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  };
-  
-  app.use(cors(corsOptions));
-// app.use(cors()); 
+  origin: process.env.FRONTEND_URL,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['set-cookie']
+};
+
+app.options('*', cors(corsOptions));
+
+app.use(cors(corsOptions));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser());
@@ -42,7 +43,6 @@ app.use('/api/twitter', twitterController);
 app.use('/api/webhooks', webhookRouter);
 app.use('/api/templates', templateController);
 app.use('/api/mappings', mappingController);
-// app.use('/api/eventData', eventController);
 
 app.use(errorMiddleware);
 

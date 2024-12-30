@@ -38,6 +38,10 @@ const Log = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    eventData: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    }
   },
   {
     tableName: 'logs',

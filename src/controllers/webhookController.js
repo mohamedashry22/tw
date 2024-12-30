@@ -34,96 +34,119 @@ export function webhookToJson(message) {
 }
 
 
-// Global variable to hold the overall price increase percentage
-let overallPriceIncreasePercentage = 0;
-
 export async function extractData(eventData, mappingJson) {
+  let overallPriceIncreasePercentage = 0;
   const parsedData = webhookToJson(eventData);
 
-  // Find existing events with the same eventName
   const existingEvents = await EventData.findAll({ where: { eventName: parsedData.nameId } });
 
-  // Create a new event with the same eventName
-  const eventToCreate = await EventData.create({
+  await EventData.create({
     data: eventData,
     eventName: parsedData.nameId,
+    price: parsedData.price,
   });
 
-  // Perform calculations between the new event and existing events
   const newEventPrice = parsedData.price;
   let totalPriceIncrease = 0;
   let priceDifferencesCount = 0;
 
-  // Calculate the percentage price increase between the new event and each existing event
-  existingEvents.forEach(event => {
-    const oldEventPrice = event.data.price; // Assuming 'data' contains price
+  existingEvents.forEach((event) => {
+    const oldEventPrice = event.price;
     if (oldEventPrice > 0) {
-      const priceIncrease = ((newEventPrice - oldEventPrice) / oldEventPrice) * 100; // Percentage increase
+      const priceIncrease = ((newEventPrice - oldEventPrice) / oldEventPrice) * 100;
       totalPriceIncrease += priceIncrease;
       priceDifferencesCount++;
     }
   });
 
-  // Calculate the average price increase percentage
   if (priceDifferencesCount > 0) {
     overallPriceIncreasePercentage = totalPriceIncrease / priceDifferencesCount;
+  } else {
+    overallPriceIncreasePercentage = 0;
   }
 
-  const result = {};
+  let formattedProfitLoss = '0%';
+  if (overallPriceIncreasePercentage !== 0) {
+    const sign = overallPriceIncreasePercentage > 0 ? '+' : '';
+    formattedProfitLoss = `${sign}${overallPriceIncreasePercentage.toFixed(2)}%`;
+  }
 
-  // Create the strategy object structure
   const strategyData = {
     strategy: {
       order: {
         action: parsedData.action,
-        contracts: parsedData.contracts
-      }
+        contracts: parsedData.contracts,
+      },
     },
     syminfo: {
-      basecurrency: parsedData.symbol
+      basecurrency: parsedData.symbol,
     },
     ticker: parsedData.ticker,
     close: newEventPrice,
-    interval: parsedData.timeframe
+    interval: parsedData.timeframe,
+    profitLoss: formattedProfitLoss,
   };
 
   mappingJson = JSON.parse(mappingJson);
 
-  // Map the data according to mappingJson
-  for (const [key, path] of Object.entries(mappingJson)) {
-    let value = path.split('.').reduce((obj, key) => obj?.[key], strategyData);
-    result[path] = value;
+  if (overallPriceIncreasePercentage !== 0) {
+    mappingJson.profitLoss = 'profitLoss';
   }
 
-  // Return the result and the global variable with the calculated price increase percentage
-  result.priceIncreasePercentage = overallPriceIncreasePercentage;
+  const result = {};
+
+  for (const [key, path] of Object.entries(mappingJson)) {
+    let value = path.split('.').reduce((obj, key) => obj?.[key], strategyData);
+    result[key] = value;
+  }
 
   return result;
 }
 
-// export function renderTemplate(template, data) {
-//   return template.replace(/\{\{([^}]+)\}\}/g, (match, path) => {
-//     const value = path.split('.').reduce((obj, key) => obj?.[key], data);
-//     return value !== undefined ? value : match;
-//   });
-// }
 
-export function renderTemplate(template, data) {
-  return template.replace(/{{\s*([\w.]+)\s*}}/g, (_, key) => {
-    // Use jsonpath to resolve the key
-    const results = [data[key]];
-    // jsonpath.query returns an array, use the first value if found
-    return results.length ? results[0] : `{{${key}}}`;
-  });
+function replaceTokens(content, extractedData, mappingJSON) {
+  let mappingObj = JSON.parse(mappingJSON);
+
+  if (extractedData.profitLoss !== 0) {
+    mappingObj.profitLoss = 'profitLoss';
+  }
+
+  function escapeRegExp(string) {
+    return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  for (let mappingKey in mappingObj) {
+    let mappingValue = mappingObj[mappingKey];
+
+    let token = '{{' + mappingValue + '}}';
+
+    let value = extractedData[mappingKey];
+
+    if (value === undefined) {
+      console.warn('No value for key', mappingKey);
+      continue;
+    }
+
+    let valueStr = value.toString();
+
+    let regex = new RegExp(escapeRegExp(token), 'g');
+
+    content = content.replace(regex, valueStr);
+  }
+
+  return content;
 }
 
 
-eventRouter.post('/event/:endpointId', async (req, res, next) => {
+
+eventRouter.post('/:endpointId', async (req, res, next) => {
   try {
-    const { endpointId } = req.params;
-    overallPriceIncreasePercentage = 0;
-    console.log('Received webhook for endpoint:', endpointId);
+
     
+
+    const { endpointId } = req.params;
+    console.log('Received webhook for endpoint:', endpointId);
+
     const webhook = await Webhook.findOne({
       where: { endpointUrl: endpointId, isActive: true },
     });
@@ -132,7 +155,6 @@ eventRouter.post('/event/:endpointId', async (req, res, next) => {
       return res.status(404).json({ message: 'Webhook endpoint not found or inactive' });
     }
 
-    // For this example, assuming the eventData is a string
     const eventData = req.body.message;
 
     console.log('Received event data:', eventData);
@@ -148,12 +170,24 @@ eventRouter.post('/event/:endpointId', async (req, res, next) => {
       
       const extractedData = await extractData(eventData, mappingJson);
       console.log('Extracted data:', extractedData);
+
+      let templateContent = template.content;
+        if ( extractedData.profitLoss)         
+        {
+          console.log("it goes with profitLoss.");
+          templateContent = template.contentClose;
+        } else {
+          console.log("it goes without profitLoss.");
+        }
       
-      let tweetContent = renderTemplate(template.content, extractedData);
+      let tweetContent = replaceTokens(templateContent, extractedData, mappingJson);
       console.log('Generated tweet:', tweetContent);
       tweetContent = tweetContent.replace(/\\n/g, '\n');
-      console.log('overallPriceIncreasePercentage', overallPriceIncreasePercentage);
-      await twitterService.postTweet(tweetContent);
+      await twitterService.postTweet(tweetContent, webhook.userId, {
+        originalEvent: eventData,
+        extractedData,
+        webhookEndpoint: endpointId
+      });
     }
 
     res.json({ message: 'Webhook event processed successfully' });

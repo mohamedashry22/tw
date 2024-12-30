@@ -2,6 +2,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import createError from 'http-errors';
+import { Op } from 'sequelize';
 
 const router = express.Router();
 
@@ -34,9 +35,26 @@ router.post('/signup', async (req, res, next) => {
 
 router.post('/login', async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password , username} = req.body;
 
-    const user = await User.findOne({ where: { email } });
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    // const user = await User.findOne({ where: { email } });
+
+
+    const query = {};
+    if (isEmail) {
+      query.email = email;
+    } else {
+      query.username = email;
+    }
+
+    const user = await User.findOne({
+      where: {
+        [Op.or]: Object.keys(query).map(key => ({ [key]: query[key] }))
+      }
+    });
+    
 
     if (!user || !(await user.validatePassword(password))) {
       throw createError(401, 'Invalid email or password');

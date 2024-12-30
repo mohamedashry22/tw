@@ -2,6 +2,8 @@ import { TwitterApi } from 'twitter-api-v2';
 import { createLogger } from '../utils/logger.js';
 import Bottleneck from 'bottleneck';
 import Configuration from '../models/Configuration.js';
+import sequelize from '../config/database.js';
+import Log from '../models/Log.js'
 
 const logger = createLogger('TwitterService');
 
@@ -89,17 +91,40 @@ class TwitterService {
     await Configuration.upsert({ key, value });
   }
 
-  async postTweet(status) {
+  async postTweet(status, userId, eventData = null) {
+    const transaction = await sequelize.transaction();
     try {
       await this.initialize();
       const { data } = await limiter.schedule(() =>
         this.twitterClient.v2.tweet(status)
       );
+      await Log.create({
+        status,
+        type: 'success',
+        userId,
+        eventData,
+        lastAttemptedAt: new Date(),
+      }, { transaction });
+
+      await transaction.commit();
       logger.info(`Tweet posted successfully: ${data.id}`);
       return data;
     } catch (error) {
       console.log('ashryLOgerror',error);
       logger.error('Error posting tweet', error);
+
+      await Log.create({
+        status,
+        type: 'failure',
+        errorMessage: error.message,
+        errorCode: error.code,
+        userId,
+        eventData,
+        retryCount: 0,
+        lastAttemptedAt: new Date(),
+      }, { transaction });
+
+      await transaction.commit();
 
       if (
         error.code === 429 ||

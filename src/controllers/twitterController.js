@@ -21,54 +21,25 @@ function calculateWaitTime(retryCount) {
 }
 
 router.post('/tweet', authMiddleware, async (req, res, next) => {
-  const transaction = await sequelize.transaction();
   try {
     const { status } = req.body;
     if (!status || status.length === 0) {
       throw createError(400, 'Status is required');
     }
 
-    const userId = req.user.id;
-
     try {
-      const tweetData = await twitterService.postTweet(status);
+      const tweetData = await twitterService.postTweet(status, req.user.id, { testing : true , isPostTweetModal: true});
 
-      await Log.create(
-        {
-          status,
-          type: 'success',
-          userId,
-          lastAttemptedAt: new Date(),
-        },
-        { transaction }
-      );
-
-      await transaction.commit();
       res.json({
         message: 'Tweet posted successfully',
         tweetData,
       });
     } catch (error) {
-      await Log.create(
-        {
-          status,
-          type: 'failure',
-          errorMessage: error.message,
-          errorCode: error.code,
-          userId,
-          retryCount: 0,
-          lastAttemptedAt: new Date(),
-        },
-        { transaction }
-      );
-
-      await transaction.commit();
       res.status(500).json({
         message: 'Failed to post tweet. It has been saved for retry.',
       });
     }
   } catch (error) {
-    await transaction.rollback();
     next(error);
   }
 });
@@ -214,15 +185,7 @@ router.post('/resend-successful-tweet/:id', authMiddleware, async (req, res, nex
         tweetData,
       });
     } catch (error) {
-      // await Log.create({
-      //   status: successfulTweet.status,
-      //   type: 'failure',
-      //   errorMessage: error.message,
-      //   errorCode: error.code,
-      //   userId,
-      //   retryCount: 0,
-      //   lastAttemptedAt: new Date(),
-      // });
+
       console.log(error);
       res.status(500).json({
         message: 'Failed to resend tweet',

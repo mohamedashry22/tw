@@ -59,9 +59,9 @@ router.get('/', authMiddleware, async (req, res, next) => {
 router.post('/', authMiddleware, async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { webhookId, templateId, mappingJson } = req.body;
+    const { webhookId, templateId, mappingJson, alert , alertToken } = req.body;
 
-    console.log("ashry", webhookId,templateId,mappingJson);
+    console.log("received mapping", webhookId,templateId,mappingJson);
 
     // const webhook = await Webhook.findOne({ where: { id: webhookId, userId } });
     const webhook = await Webhook.findOne({ where: { id: webhookId } });
@@ -76,6 +76,8 @@ router.post('/', authMiddleware, async (req, res, next) => {
       webhookId,
       templateId,
       mappingJson: JSON.stringify(mappingJson),
+      alert,
+      alertToken
     });
 
     res.status(201).json(mapping);
@@ -90,9 +92,9 @@ router.get('/:id', authMiddleware, checkOwnership, async (req, res) => {
 
 router.put('/:id', authMiddleware, checkOwnership, async (req, res, next) => {
   try {
-    const { mappingJson } = req.body;
+    const { mappingJson, alert , alertToken, webhookId, templateId } = req.body;
     console.log('mappingJsonmappingJson', mappingJson)
-    await req.mapping.update({ mappingJson: JSON.stringify(mappingJson) });
+    await req.mapping.update({ mappingJson: JSON.stringify(mappingJson) , alert , alertToken , webhookId, templateId });
     res.json(req.mapping);
   } catch (error) {
     next(error);

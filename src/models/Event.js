@@ -13,6 +13,10 @@ const EventData = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    price: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     eventName: {
       type: DataTypes.STRING,
       allowNull: true,
