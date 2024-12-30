@@ -96,7 +96,7 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
         templateContent = template.contentClose;
       }
       
-     const tweetContent = replaceTokens(templateContent, extractedData);
+     let tweetContent = replaceTokens(templateContent, extractedData);
 
       console.log('Generated tweet:', tweetContent);
       tweetContent = tweetContent.replace(/\\n/g, '\n');
