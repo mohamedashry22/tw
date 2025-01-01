@@ -28,11 +28,12 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
     });
 
     if (!webhook) {
+      console.log('Webhook endpoint not found or inactive', req.body);
       return res.status(404).json({ message: 'Webhook endpoint not found or inactive' });
     }
 
     let eventData;
-    if (req.headers['content-type'] === 'text/plain') {
+    if (req.headers['content-type'] && req.headers['content-type'].startsWith('text/plain')) {
       eventData = req.body;
     } else if (req.headers['content-type'] === 'application/json') {
       eventData = req.body.message;
