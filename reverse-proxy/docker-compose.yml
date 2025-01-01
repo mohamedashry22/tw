@@ -9,7 +9,9 @@ services:
       - "443:443"
     networks:
       - app-network
-    depends_on:
+    external_links:
+      - frontend_frontend_1
+      - backend_backend_1
       - frontend
       - backend
 
