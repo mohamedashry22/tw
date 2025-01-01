@@ -33,9 +33,9 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
 
     let eventData;
     if (req.headers['content-type'] === 'text/plain') {
-      eventData = { message: req.body };
-    } else if (req.headers['content-type'] === 'application/json') {
       eventData = req.body;
+    } else if (req.headers['content-type'] === 'application/json') {
+      eventData = req.body.message;
     } else {
       return res.status(415).json({ message: "Unsupported Content-Type" });
     }
