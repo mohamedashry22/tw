@@ -18,6 +18,10 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
   try {
     const { endpointId } = req.params;
     console.log('Received webhook for endpoint:', endpointId);
+    console.log('--- Incoming Webhook Request ---');
+    console.log('Received webhook Query Parameters:', req.query);
+    console.log('Received webhook Headers:', req.headers);
+    console.log('Received webhook Body:', req.body);
 
     const webhook = await Webhook.findOne({
       where: { endpointUrl: endpointId, isActive: true },
