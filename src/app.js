@@ -50,7 +50,7 @@ app.use('/webhooks', webhookRouter);
 app.use('/templates', templateController);
 app.use('/mappings', mappingController);
 
-app.use('/api', eventRouter);
+app.use('/', eventRouter);
 
 app.use(errorMiddleware);
 
