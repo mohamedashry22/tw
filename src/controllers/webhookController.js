@@ -31,7 +31,11 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
       return res.status(404).json({ message: 'Webhook endpoint not found or inactive' });
     }
 
-    const eventData = req.body.message;
+    const eventData = req.body?.message || req.body;
+
+    if (!req.body || !req.body.message) {
+      return res.status(422).json({ message: "req.body.message is empty" });
+    }
 
     console.log('Received event data:upd', eventData);
 
