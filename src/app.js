@@ -42,14 +42,14 @@ app.use(cookieParser());
 //   });
 // });
 
-app.use('/api', eventRouter);
-app.use('/api/auth', authController);
-app.use('/api/users', userController);
-app.use('/api/configuration', configurationController);
-app.use('/api/twitter', twitterController);
-app.use('/api/webhooks', webhookRouter);
-app.use('/api/templates', templateController);
-app.use('/api/mappings', mappingController);
+app.use('/', eventRouter);
+app.use('/auth', authController);
+app.use('/users', userController);
+app.use('/configuration', configurationController);
+app.use('/twitter', twitterController);
+app.use('/webhooks', webhookRouter);
+app.use('/templates', templateController);
+app.use('/mappings', mappingController);
 
 app.use(errorMiddleware);
 
