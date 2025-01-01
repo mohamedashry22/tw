@@ -40,7 +40,7 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
       return res.status(415).json({ message: "Unsupported Content-Type" });
     }
 
-    if (!req.body || !req.body.message) {
+    if (!eventData) {
       return res.status(422).json({ message: "req.body.message is empty" });
     }
 
