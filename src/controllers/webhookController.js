@@ -31,7 +31,14 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
       return res.status(404).json({ message: 'Webhook endpoint not found or inactive' });
     }
 
-    const eventData = req.body?.message || req.body;
+    let eventData;
+    if (req.headers['content-type'] === 'text/plain') {
+      eventData = { message: req.body };
+    } else if (req.headers['content-type'] === 'application/json') {
+      eventData = req.body;
+    } else {
+      return res.status(415).json({ message: "Unsupported Content-Type" });
+    }
 
     if (!req.body || !req.body.message) {
       return res.status(422).json({ message: "req.body.message is empty" });
