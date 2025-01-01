@@ -42,7 +42,6 @@ app.use(cookieParser());
 //   });
 // });
 
-app.use('/', eventRouter);
 app.use('/auth', authController);
 app.use('/users', userController);
 app.use('/configuration', configurationController);
@@ -50,6 +49,8 @@ app.use('/twitter', twitterController);
 app.use('/webhooks', webhookRouter);
 app.use('/templates', templateController);
 app.use('/mappings', mappingController);
+
+app.use('/', eventRouter);
 
 app.use(errorMiddleware);
 
