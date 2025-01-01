@@ -62,8 +62,8 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
       }
 
       const extractedData = parseAlertMessage(
-        eventData,
-        mapping.alertToken,
+        eventData?.replace(/\s{2,}/g, ' '),
+        mapping.alertToken?.replace(/\s{2,}/g, ' '),
         JSON.parse(mapping.mappingJson),
       );
 
@@ -73,7 +73,7 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
       if (extractedData.nameId) {
         existingEvents = await EventData.findAll({ where: { eventName: extractedData.nameId } });
         await EventData.create({
-          data: eventData,
+          data: eventData?.replace(/\s{2,}/g, ' '),
           eventName: extractedData.nameId,
           price: extractedData.close || extractedData.price,
         });
@@ -117,7 +117,7 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
       console.log('Generated tweet:', tweetContent);
       tweetContent = tweetContent.replace(/\\n/g, '\n');
       await twitterService.postTweet(tweetContent, webhook.userId, {
-        originalEvent: eventData,
+        originalEvent: eventData.replace(/\s{2,}/g, ' '),
         extractedData,
         webhookEndpoint: endpointId
       });
