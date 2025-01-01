@@ -35,14 +35,14 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser());
 
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    message: 'API is running!'
-  });
-});
+// app.get('/health', (req, res) => {
+//   res.status(200).json({
+//     status: 'success',
+//     message: 'API is running!'
+//   });
+// });
 
-app.use('/api/', eventRouter);
+app.use('/api', eventRouter);
 app.use('/api/auth', authController);
 app.use('/api/users', userController);
 app.use('/api/configuration', configurationController);
