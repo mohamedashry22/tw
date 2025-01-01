@@ -20,6 +20,9 @@ dotenv.config();
 const app = express();
 
 app.use(helmet());
+app.use(express.json());
+app.use(express.text()); 
+
 const corsOptions = {
   origin: process.env.FRONTEND_URL,
   credentials: true,
