@@ -45,7 +45,7 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
       return res.status(422).json({ message: "req.body.message is empty" });
     }
 
-    console.log('Received event data:upd', eventData);
+    console.log('Received event data:', eventData);
 
     const mappings = await webhook.getMappings();
     console.log(`Processing ${mappings.length} mappings`);
@@ -53,7 +53,7 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
     for (const mapping of mappings) {
       const template = await mapping.getTemplate();
       const mappingJson = JSON.parse(mapping.mappingJson);
-      
+
       console.log('Using mapping:', mappingJson);
 
       if (!doesMessageMatchTemplate(mapping.alert, mapping.alertToken, JSON.parse(mapping.mappingJson))) {
@@ -67,38 +67,54 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
         JSON.parse(mapping.mappingJson),
       );
 
-      console.log('finalContent' , extractedData)
+      console.log('Extracted data:', extractedData);
 
-      let existingEvents = [];
-      if (extractedData.nameId) {
-        existingEvents = await EventData.findAll({ where: { eventName: extractedData.nameId } });
+      if (!extractedData.nameId) {
+        return res.status(422).json({ message: "Required field 'nameId' is missing in extracted data" });
+      }
+
+      const allEvents = await EventData.findAll({
+        where: { eventName: extractedData.nameId, status : 'open' },
+        order: [['createdAt', 'ASC']],
+      });
+
+      if (allEvents.length > 0) {
+        console.log('Open event found. Closing the old event.');
+        for (const event of allEvents) {
+          await event.update({ status: 'closed' });
+        }
         await EventData.create({
           data: eventData?.replace(/\s{2,}/g, ' '),
           eventName: extractedData.nameId,
           price: extractedData.close || extractedData.price,
+          status: 'closed',
         });
-      }      
+      } else {
+        console.log('No open event found.');
+        await EventData.create({
+          data: eventData?.replace(/\s{2,}/g, ' '),
+          eventName: extractedData.nameId,
+          price: extractedData.close || extractedData.price,
+          status: 'open',
+        });
+      }
 
       const newEventPrice = extractedData.close || extractedData.price;
       let totalPriceIncrease = 0;
       let priceDifferencesCount = 0;
-      let overallPriceIncreasePercentage = 0;
 
-      existingEvents.forEach((event) => {
-        const oldEventPrice = event.price;
-        if (oldEventPrice > 0) {
-          const priceIncrease = ((newEventPrice - oldEventPrice) / oldEventPrice) * 100;
+      allEvents.forEach((event) => {
+        if (event.price > 0) {
+          const priceIncrease = ((newEventPrice - event.price) / event.price) * 100;
           totalPriceIncrease += priceIncrease;
           priceDifferencesCount++;
         }
       });
-    
-      if (priceDifferencesCount > 0) {
-        overallPriceIncreasePercentage = totalPriceIncrease / priceDifferencesCount;
-      } else {
-        overallPriceIncreasePercentage = 0;
-      }
-    
+
+      const overallPriceIncreasePercentage = priceDifferencesCount > 0
+        ? totalPriceIncrease / priceDifferencesCount
+        : 0;
+
       let formattedProfitLoss = '+0.00%';
       if (overallPriceIncreasePercentage !== 0) {
         const sign = overallPriceIncreasePercentage > 0 ? '+' : '';
@@ -106,20 +122,20 @@ eventRouter.post('/:endpointId', async (req, res, next) => {
       }
 
       let templateContent = template.content;
-      if (existingEvents.length > 0) {
-        console.log("it goes with profitLoss.");
+      if (allEvents.length > 0) {
+        console.log("Using profit/loss data for the tweet.");
         extractedData.profitLoss = formattedProfitLoss;
         templateContent = template.contentClose;
       }
-      
-     let tweetContent = replaceTokens(templateContent, extractedData);
+
+      let tweetContent = replaceTokens(templateContent, extractedData);
 
       console.log('Generated tweet:', tweetContent);
       tweetContent = tweetContent.replace(/\\n/g, '\n');
       await twitterService.postTweet(tweetContent, webhook.userId, {
         originalEvent: eventData.replace(/\s{2,}/g, ' '),
         extractedData,
-        webhookEndpoint: endpointId
+        webhookEndpoint: endpointId,
       });
     }
 
