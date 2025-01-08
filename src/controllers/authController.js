@@ -82,7 +82,6 @@ router.post('/login', async (req, res, next) => {
   .cookie("accessToken", accessToken, {
     httpOnly: true, 
     secure: true,
-    sameSite: "None",
     maxAge: thirtyDaysInMilliseconds,
     expires: new Date(Date.now() + thirtyDaysInMilliseconds), 
     domain: ".onrender.com"
@@ -90,7 +89,6 @@ router.post('/login', async (req, res, next) => {
   .cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "None",
     maxAge: nintyDaysInMilliseconds,
     expires: new Date(Date.now() + nintyDaysInMilliseconds),
     domain: ".onrender.com"
