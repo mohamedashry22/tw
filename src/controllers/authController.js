@@ -81,14 +81,10 @@ router.post('/login', async (req, res, next) => {
   .status(200)
   .cookie("accessToken", accessToken, {
     httpOnly: true, 
-    secure: true,
-    sameSite: 'None',
     maxAge: thirtyDaysInMilliseconds
   })
   .cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: true,
-    sameSite: 'None',
     maxAge: nintyDaysInMilliseconds
   })
   .json({
