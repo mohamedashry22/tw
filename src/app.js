@@ -38,22 +38,22 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser());
 
-// app.get('/health', (req, res) => {
-//   res.status(200).json({
-//     status: 'success',
-//     message: 'API is running!'
-//   });
-// });
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'API is running!'
+  });
+});
 
-app.use('/auth', authController);
-app.use('/users', userController);
-app.use('/configuration', configurationController);
-app.use('/twitter', twitterController);
-app.use('/webhooks', webhookRouter);
-app.use('/templates', templateController);
-app.use('/mappings', mappingController);
+app.use('/api/auth', authController);
+app.use('/api/users', userController);
+app.use('/api/configuration', configurationController);
+app.use('/api/twitter', twitterController);
+app.use('/api/webhooks', webhookRouter);
+app.use('/api/templates', templateController);
+app.use('/api/mappings', mappingController);
 
-app.use('/', eventRouter);
+app.use('/api/', eventRouter);
 
 app.use(errorMiddleware);
 
