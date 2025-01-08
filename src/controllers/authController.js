@@ -75,23 +75,21 @@ router.post('/login', async (req, res, next) => {
     const thirtyDaysInMilliseconds = 90 * 24 * 60 * 60 * 1000;
     const nintyDaysInMilliseconds = 180 * 24 * 60 * 60 * 1000;
 
-    console.log('domain: process.env.FRONTEND_URL authController LAX', process.env.FRONTEND_URL);
+    console.log('domain: process.env.FRONTEND_URL authController None', process.env.FRONTEND_URL);
 
     res
   .status(200)
   .cookie("accessToken", accessToken, {
     httpOnly: true, 
     secure: true,
-    sameSite: 'lax',
-    maxAge: thirtyDaysInMilliseconds,
-    domain: ".onrender.com"
+    sameSite: 'None',
+    maxAge: thirtyDaysInMilliseconds
   })
   .cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: true,
-    sameSite: 'lax',
-    maxAge: nintyDaysInMilliseconds,
-    domain: ".onrender.com"
+    sameSite: 'None',
+    maxAge: nintyDaysInMilliseconds
   })
   .json({
     message: "Login successful",
