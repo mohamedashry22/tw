@@ -83,14 +83,12 @@ router.post('/login', async (req, res, next) => {
     httpOnly: true, 
     secure: true,
     maxAge: thirtyDaysInMilliseconds,
-    expires: new Date(Date.now() + thirtyDaysInMilliseconds), 
     domain: ".onrender.com"
   })
   .cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: true,
     maxAge: nintyDaysInMilliseconds,
-    expires: new Date(Date.now() + nintyDaysInMilliseconds),
     domain: ".onrender.com"
   })
   .json({
