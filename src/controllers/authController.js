@@ -84,12 +84,16 @@ router.post('/login', async (req, res, next) => {
           maxAge: thirtyDaysInMilliseconds,
           express: new Date(Date.now() + 100000),
           domain: process.env.FRONTEND_URL
+          ? new URL(process.env.FRONTEND_URL).hostname
+          : undefined,
         })
         .cookie("refreshToken", refreshToken, {
           httpOnly: true,
           maxAge: nintyDaysInMilliseconds,
           express: new Date(Date.now() + 100000),
           domain: process.env.FRONTEND_URL
+          ? new URL(process.env.FRONTEND_URL).hostname
+          : undefined,
         })
         .json({ message: "Login successful", user: {
           id: user.id,
