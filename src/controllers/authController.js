@@ -75,17 +75,21 @@ router.post('/login', async (req, res, next) => {
     const thirtyDaysInMilliseconds = 90 * 24 * 60 * 60 * 1000;
     const nintyDaysInMilliseconds = 180 * 24 * 60 * 60 * 1000;
 
+    console.log('domain: process.env.FRONTEND_URL authController', process.env.FRONTEND_URL);
+
     res
         .status(200)
         .cookie("accessToken", accessToken, {
           httpOnly: true,
           maxAge: thirtyDaysInMilliseconds,
           express: new Date(Date.now() + 100000),
+          domain: process.env.FRONTEND_URL
         })
         .cookie("refreshToken", refreshToken, {
           httpOnly: true,
           maxAge: nintyDaysInMilliseconds,
           express: new Date(Date.now() + 100000),
+          domain: process.env.FRONTEND_URL
         })
         .json({ message: "Login successful", user: {
           id: user.id,
