@@ -78,30 +78,34 @@ router.post('/login', async (req, res, next) => {
     console.log('domain: process.env.FRONTEND_URL authController', process.env.FRONTEND_URL);
 
     res
-        .status(200)
-        .cookie("accessToken", accessToken, {
-          httpOnly: true,
-          maxAge: thirtyDaysInMilliseconds,
-          express: new Date(Date.now() + 100000),
-          domain: process.env.FRONTEND_URL
-          ? new URL(process.env.FRONTEND_URL).hostname
-          : undefined,
-        })
-        .cookie("refreshToken", refreshToken, {
-          httpOnly: true,
-          maxAge: nintyDaysInMilliseconds,
-          express: new Date(Date.now() + 100000),
-          domain: process.env.FRONTEND_URL
-          ? new URL(process.env.FRONTEND_URL).hostname
-          : undefined,
-        })
-        .json({ message: "Login successful", user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-        } });
-
+  .status(200)
+  .cookie("accessToken", accessToken, {
+    httpOnly: true, 
+    secure: true,
+    sameSite: "None",
+    maxAge: thirtyDaysInMilliseconds,
+    expires: new Date(Date.now() + thirtyDaysInMilliseconds), 
+    domain: process.env.FRONTEND_URL
+      ? new URL(process.env.FRONTEND_URL).hostname
+      : undefined,
+  })
+  .cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    maxAge: nintyDaysInMilliseconds,
+    expires: new Date(Date.now() + nintyDaysInMilliseconds),
+    domain: "twitter-mvp-dashboard.onrender.com",
+  })
+  .json({
+    message: "Login successful",
+    user: {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    },
+  });
   } catch (error) {
     next(error);
   }
