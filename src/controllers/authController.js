@@ -84,18 +84,20 @@ router.post('/login', async (req, res, next) => {
     secure: true,
     sameSite: "None",
     maxAge: thirtyDaysInMilliseconds,
-    expires: new Date(Date.now() + thirtyDaysInMilliseconds), 
+    express: new Date(Date.now() + thirtyDaysInMilliseconds), 
     domain: process.env.FRONTEND_URL
       ? new URL(process.env.FRONTEND_URL).hostname
-      : undefined,
+      : undefined
   })
   .cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: true,
     sameSite: "None",
     maxAge: nintyDaysInMilliseconds,
-    expires: new Date(Date.now() + nintyDaysInMilliseconds),
-    domain: "twitter-mvp-dashboard.onrender.com",
+    express: new Date(Date.now() + nintyDaysInMilliseconds),
+    domain: process.env.FRONTEND_URL
+      ? new URL(process.env.FRONTEND_URL).hostname
+      : undefined
   })
   .json({
     message: "Login successful",
