@@ -84,14 +84,14 @@ router.post('/login', async (req, res, next) => {
     secure: true,
     sameSite: 'none',
     maxAge: thirtyDaysInMilliseconds,
-    // domain: ".onrender.com"
+    domain: ".onrender.com"
   })
   .cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: true,
     sameSite: 'none',
     maxAge: nintyDaysInMilliseconds,
-    // domain: ".onrender.com"
+    domain: ".onrender.com"
   })
   .json({
     message: "Login successful",
