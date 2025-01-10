@@ -12,10 +12,12 @@ services:
       - DATABASE_URL=sqlite:/data/database.sqlite
     volumes:
       - sqlite-data:/data
+    ports:
+      - "5000:5000"
     restart: unless-stopped
 
 networks:
-  app-network: # No 'external: true' here
+  app-network:
 
 volumes:
   sqlite-data:

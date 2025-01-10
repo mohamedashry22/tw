@@ -19,15 +19,17 @@ COPY package*.json ./
 RUN rm -rf node_modules
 RUN npm cache clean --force
 
-# Install dependencies and rebuild sqlite3
-RUN npm install sqlite3 --build-from-source
+# Install dependencies
 RUN npm install
+
+# Create persistent storage directory for the database
+RUN mkdir -p /data && chown -R node:node /data
+
+# Switch to a non-root user for better security
+USER node
 
 # Copy the rest of the application code
 COPY . .
-
-# Create persistent storage directory for the database
-RUN mkdir -p /data
 
 # Set environment variables
 ENV DATABASE_URL=sqlite:/data/database.sqlite
