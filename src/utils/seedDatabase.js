@@ -3,6 +3,13 @@ import Configuration from '../models/Configuration.js';
 
 export async function seedDatabase() {
   try {
+
+    const count = await User.count();
+    if (count > 0) {
+      console.log('Database already seeded. Skipping seed operation.');
+      return;
+    } 
+    
     const adminUser = await User.findOne({ where: { username: 'admin' } });
     if (!adminUser) {
       await User.create({
