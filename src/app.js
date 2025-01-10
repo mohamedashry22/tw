@@ -43,19 +43,25 @@ app.use(cookieParser());
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'success',
-    message: 'API is running!d'
+    message: 'API is running!'
   });
 });
 
-app.use('/api/auth', authController);
-app.use('/api/users', userController);
-app.use('/api/configuration', configurationController);
-app.use('/api/twitter', twitterController);
-app.use('/api/webhooks', webhookRouter);
-app.use('/api/templates', templateController);
-app.use('/api/mappings', mappingController);
+const isDev = process.env.NODE_ENV === 'development';
 
-app.use('/api/', eventRouter);
+console.log('isDev Env', isDev);
+
+const routePrefix = (path) => (isDev ? `/api${path}` : path);
+
+app.use(routePrefix('/auth'), authController);
+app.use(routePrefix('/users'), userController);
+app.use(routePrefix('/configuration'), configurationController);
+app.use(routePrefix('/twitter'), twitterController);
+app.use(routePrefix('/webhooks'), webhookRouter);
+app.use(routePrefix('/templates'), templateController);
+app.use(routePrefix('/mappings'), mappingController);
+
+app.use(routePrefix('/'), eventRouter);
 
 app.use(errorMiddleware);
 
