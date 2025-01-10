@@ -11,13 +11,15 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=sqlite:/data/database.sqlite
     volumes:
-      - sqlite-data:/data
+      - sqlite-data:/data:rw
     ports:
       - "5000:5000"
     restart: unless-stopped
+    user: "node"
 
 networks:
   app-network:
 
 volumes:
   sqlite-data:
+    driver: local

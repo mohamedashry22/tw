@@ -22,14 +22,14 @@ RUN npm cache clean --force
 # Install dependencies
 RUN npm install
 
-# Create persistent storage directory for the database
-RUN mkdir -p /data && chown -R node:node /data
+# Copy the rest of the application code
+COPY . .
+
+# Create data directory and set permissions
+RUN mkdir -p /data && chown -R node:node /data /usr/src/app
 
 # Switch to a non-root user for better security
 USER node
-
-# Copy the rest of the application code
-COPY . .
 
 # Set environment variables
 ENV DATABASE_URL=sqlite:/data/database.sqlite
@@ -37,5 +37,5 @@ ENV DATABASE_URL=sqlite:/data/database.sqlite
 # Expose the application port
 EXPOSE 5000
 
-# Start the application
-CMD ["npm", "start"]
+# Add an entrypoint script to ensure proper permissions
+CMD ["sh", "-c", "mkdir -p /data && npm start"]

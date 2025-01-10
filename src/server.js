@@ -6,15 +6,16 @@ import sequelize, { initializeDatabase } from './config/database.js';
 import twitterService from './services/twitterService.js';
 import { seedDatabase } from './utils/seedDatabase.js';
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 6000;
 
 (async () => {
   try {
-    console.log('xx');
-    // await sequelize.sync({ force: false });
-    await initializeDatabase();
+    const needsInit = await initializeDatabase();
 
-    await seedDatabase();
+    // Only seed if database was newly created
+    if (needsInit) {
+      await seedDatabase();
+    }
 
     await twitterService.initialize();
 
@@ -23,5 +24,6 @@ const PORT = process.env.PORT || 5000;
     });
   } catch (error) {
     console.error('Error during initialization:', error);
+    process.exit(1);
   }
 })();
