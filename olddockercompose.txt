@@ -9,14 +9,9 @@ services:
       - app-network
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=sqlite:/data/database.sqlite
-    volumes:
-      - sqlite-data:/data
+      - DATABASE_URL=sqlite:/usr/src/app/database.sqlite
     restart: unless-stopped
 
 networks:
   app-network:
     external: true
-
-volumes:
-  sqlite-data:
