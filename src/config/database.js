@@ -1,6 +1,6 @@
 import { Sequelize } from 'sequelize';
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL || 'postgresql://mvp_data_twitter_x_user:hajVDJ8WzpfyW2CMeZcBOHVKDN7h6AAF@dpg-cu0ncq5svqrc73e1nvig-a/mvp_data_twitter_x';
 
 if (!databaseUrl) {
   throw new Error('DATABASE_URL environment variable is not set.');
