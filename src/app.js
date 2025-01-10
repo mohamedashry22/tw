@@ -49,7 +49,7 @@ app.get('/api/health', (req, res) => {
 
 const isDev = process.env.NODE_ENV === 'development';
 
-console.log('isDev Env', isDev);
+console.log('isDev Env', isDev, "process.env.NODE_ENV" + process.env.NODE_ENV);
 
 const routePrefix = (path) => (isDev ? `/api${path}` : path);
 

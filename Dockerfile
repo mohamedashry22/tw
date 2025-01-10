@@ -1,7 +1,5 @@
-# Use the official Node.js image
 FROM node:20-slim
 
-# Set the working directory in the container
 WORKDIR /usr/src/app
 
 # Install dependencies required to build native modules
@@ -12,30 +10,44 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy package.json and package-lock.json
+# Copy package files
 COPY package*.json ./
-
-# Clean up any existing node_modules and cache
-RUN rm -rf node_modules
-RUN npm cache clean --force
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
+# Copy application code
 COPY . .
 
-# Create data directory and set permissions
-RUN mkdir -p /data && chown -R node:node /data /usr/src/app
+# Create a script to handle data directory setup
+RUN echo '#!/bin/sh\n\
+if [ ! -d "/data" ]; then\n\
+    echo "Data directory does not exist. Creating..."\n\
+    mkdir -p /data\n\
+    echo "Setting permissions for /data directory..."\n\
+    chmod 777 /data\n\
+    chown node:node /data\n\
+else\n\
+    echo "Data directory already exists. Checking permissions..."\n\
+    # Ensure permissions are correct even if directory exists\n\
+    chmod 777 /data\n\
+    chown node:node /data\n\
+fi\n\
+\n\
+echo "Starting application..."\n\
+exec npm start' > /usr/src/app/docker-entrypoint.sh && \
+chmod +x /usr/src/app/docker-entrypoint.sh
 
-# Switch to a non-root user for better security
+# Switch to non-root user
 USER node
 
-# Set environment variables
-ENV DATABASE_URL=sqlite:/data/database.sqlite
+# Set Render flag and enable Node.js logging
+ENV RENDER=true
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--trace-warnings"
+ENV DEBUG="*"
 
-# Expose the application port
 EXPOSE 5000
 
-# Add an entrypoint script to ensure proper permissions
-CMD ["sh", "-c", "mkdir -p /data && npm start"]
+# Use the entrypoint script
+CMD ["/usr/src/app/docker-entrypoint.sh"]

@@ -10,10 +10,14 @@ const PORT = process.env.PORT || 6000;
 
 (async () => {
   try {
-    const needsInit = await initializeDatabase();
+    console.log('Starting server initialization...');
+    
+    // Initialize database and check if seeding is needed
+    const { needsSeeding } = await initializeDatabase();
 
-    // Only seed if database was newly created
-    if (needsInit) {
+    // Only seed if the database was newly created
+    if (needsSeeding) {
+      console.log('New database detected, running seeds...');
       await seedDatabase();
     }
 

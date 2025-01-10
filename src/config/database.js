@@ -2,9 +2,14 @@ import { Sequelize } from 'sequelize';
 import fs from 'fs';
 import path from 'path';
 
-const dbPath = process.env.DATABASE_URL
-  ? process.env.DATABASE_URL.replace('sqlite:', '')
-  : path.resolve('../../database.sqlite');
+// Special handling for Render.com
+const isRender = process.env.RENDER === 'true';
+console.log('isRender-ENV', isRender)
+const dbPath = isRender 
+  ? '/data/database.sqlite'
+  : process.env.DATABASE_URL
+    ? process.env.DATABASE_URL.replace('sqlite:', '')
+    : path.resolve('../../database.sqlite');
 
 const sequelize = new Sequelize({
   dialect: 'sqlite',
@@ -14,27 +19,42 @@ const sequelize = new Sequelize({
 
 export const initializeDatabase = async () => {
   try {
-    // Ensure the directory exists
+    // Ensure the data directory exists with correct permissions
     const dbDir = path.dirname(dbPath);
     if (!fs.existsSync(dbDir)) {
       fs.mkdirSync(dbDir, { recursive: true });
+      if (isRender) {
+        fs.chmodSync(dbDir, '777');
+      }
     }
 
-    // Check if database needs initialization
-    const needsInit = !fs.existsSync(dbPath);
-    
-    if (needsInit) {
+    // Check if database file exists
+    const dbExists = fs.existsSync(dbPath);
+    console.log(`Database ${dbExists ? 'exists' : 'does not exist'} at ${dbPath}`);
+
+    if (!dbExists) {
       console.log('Database does not exist. Creating and running migrations...');
-      await sequelize.sync({ force: true }); // Use force: true only for initial setup
-    } else {
-      console.log('Database exists. Checking connection...');
-      await sequelize.authenticate();
+      // Create empty file to ensure proper permissions
+      fs.writeFileSync(dbPath, '', { flag: 'w' });
+      if (isRender) {
+        fs.chmodSync(dbPath, '777');
+      }
       
-      // Optionally run migrations for schema updates
-      await sequelize.sync({ alter: true });
+      // Force sync to create all tables
+      await sequelize.sync({ force: true });
+      return { needsSeeding: true };
     }
-    
-    return needsInit; // Return whether initialization was needed
+
+    // Database exists, just authenticate and run migrations
+    try {
+      await sequelize.authenticate();
+      await sequelize.sync({ alter: true });
+      console.log('Database initialized successfully');
+      return { needsSeeding: false };
+    } catch (error) {
+      console.error('Error accessing existing database:', error);
+      throw error;
+    }
   } catch (error) {
     console.error('Error initializing database:', error);
     throw error;
