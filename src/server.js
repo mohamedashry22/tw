@@ -13,13 +13,13 @@ const PORT = process.env.PORT || 6000;
     console.log('Starting server initialization...');
     
     // Initialize database and check if seeding is needed
-    const { needsSeeding } = await initializeDatabase();
+     await initializeDatabase();
 
     // Only seed if the database was newly created
-    if (needsSeeding) {
+
       console.log('New database detected, running seeds...');
       await seedDatabase();
-    }
+
 
     await twitterService.initialize();
 
