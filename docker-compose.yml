@@ -9,10 +9,8 @@ services:
       - app-network
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=sqlite:/data/database.sqlite
+      - DATABASE_URL=postgresql://mvp_data_twitter_x_user:hajVDJ8WzpfyW2CMeZcBOHVKDN7h6AAF@dpg-cu0ncq5svqrc73e1nvig-a/mvp_data_twitter_x
       - RENDER=true
-    volumes:
-      - sqlite-data:/data:rw
     ports:
       - "5000:5000"
     restart: unless-stopped
@@ -22,14 +20,24 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    networks:
+      - app-network
+    environment:
+      POSTGRES_USER: mvp_data_twitter_x_user
+      POSTGRES_PASSWORD: hajVDJ8WzpfyW2CMeZcBOHVKDN7h6AAF
+      POSTGRES_DB: mvp_data_twitter_x
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
 networks:
   app-network:
 
 volumes:
-  sqlite-data:
-    driver: local
-    driver_opts:
-      type: none
-      device: ${PWD}/data
-      o: bind
+  postgres-data:

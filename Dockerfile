@@ -4,26 +4,13 @@ WORKDIR /usr/src/app
 
 # Install dependencies required to build native modules
 RUN apt-get update && apt-get install -y \
-    python3 \
-    make \
-    g++ \
-    sqlite3 \
-    && rm -rf /var/lib/apt/lists/*
+  python3 \
+  make \
+  g++ \
+  && rm -rf /var/lib/apt/lists/*
 
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy application code
+# Copy application code, including package.json and preinstalled node_modules
 COPY . .
-
-# Create data directory and set permissions as root
-RUN mkdir -p /data && \
-    chown -R node:node /data && \
-    chmod 777 /data && \
-    chown -R node:node /usr/src/app
 
 # Switch to non-root user
 USER node

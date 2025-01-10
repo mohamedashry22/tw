@@ -8,9 +8,6 @@ RUN apt-get update && apt-get install -y \
     g++ \
     sqlite3
 
-# Create data directory for database persistence
-RUN mkdir -p /data
-
 COPY package*.json ./
 
 RUN rm -rf node_modules
@@ -23,9 +20,6 @@ RUN npm install
 RUN npm install sqlite3 --build-from-source
 
 COPY . .
-
-# Set database path to use persistent storage
-ENV DATABASE_URL=sqlite:/data/database.sqlite
 
 EXPOSE 5000
 
