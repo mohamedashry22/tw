@@ -47,8 +47,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use('/api/auth', authController);
-app.use('/api/users', userController);
+app.use('/auth', authController);
+app.use('/users', userController);
 app.use('/configuration', configurationController);
 app.use('/twitter', twitterController);
 app.use('/webhooks', webhookRouter);
