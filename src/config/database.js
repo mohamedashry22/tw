@@ -1,30 +1,22 @@
 import { Sequelize } from 'sequelize';
 
-const isRender = process.env.RENDER === 'true';
+const databaseUrl = process.env.DATABASE_URL;
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: 'postgres',
-  logging: false, // Disable logging for cleaner output
-  dialectOptions: {
-    ssl: isRender // Enable SSL only on Render
-      ? { require: true, rejectUnauthorized: false }
-      : false,
-  },
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL environment variable is not set.');
+}
+
+const sequelize = new Sequelize(databaseUrl, {
+  dialect: 'postgres', // Explicitly set the dialect
+  logging: false, // Disable logging or set to true for debugging
 });
 
 export const initializeDatabase = async () => {
   try {
-    console.log('Starting database initialization...');
     await sequelize.authenticate();
-    console.log('Database connection authenticated');
-
-    // Synchronize models with the database
-    await sequelize.sync({ alter: true });
-    console.log('Database synchronization completed');
-
-    return { needsSeeding: false }; // Adjust as needed
+    console.log('Database connection has been established successfully.');
   } catch (error) {
-    console.error('Error initializing database:', error);
+    console.error('Unable to connect to the database:', error);
     throw error;
   }
 };
