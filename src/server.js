@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 5000;
 
 (async () => {
   try {
+    console.log('xx');
     // await sequelize.sync({ force: false });
     await initializeDatabase();
 

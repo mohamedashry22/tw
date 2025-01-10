@@ -15,8 +15,7 @@ services:
     restart: unless-stopped
 
 networks:
-  app-network:
-    external: true
+  app-network: # No 'external: true' here
 
 volumes:
   sqlite-data:
