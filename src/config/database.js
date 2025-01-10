@@ -2,9 +2,7 @@ import { Sequelize } from 'sequelize';
 import fs from 'fs';
 import path from 'path';
 
-// Special handling for Render.com
 const isRender = process.env.RENDER === 'true';
-console.log('isRender-ENV', isRender)
 const dbPath = isRender 
   ? '/data/database.sqlite'
   : process.env.DATABASE_URL
@@ -19,41 +17,56 @@ const sequelize = new Sequelize({
 
 export const initializeDatabase = async () => {
   try {
-    // Ensure the data directory exists with correct permissions
+    console.log('Starting database initialization...');
+    console.log('Database path:', dbPath);
+
     const dbDir = path.dirname(dbPath);
+    console.log('Database directory:', dbDir);
+
+    // Check if database directory exists
     if (!fs.existsSync(dbDir)) {
-      fs.mkdirSync(dbDir, { recursive: true });
-      if (isRender) {
-        fs.chmodSync(dbDir, '777');
+      console.log(`Directory ${dbDir} does not exist`);
+      try {
+        fs.mkdirSync(dbDir, { recursive: true });
+        console.log(`Created directory ${dbDir}`);
+      } catch (err) {
+        console.error(`Failed to create directory: ${err.message}`);
+        // If we can't create the directory, try to use a fallback location
+        const fallbackDir = path.resolve(process.cwd(), 'data');
+        console.log(`Attempting to use fallback directory: ${fallbackDir}`);
+        fs.mkdirSync(fallbackDir, { recursive: true });
+        sequelize.options.storage = path.join(fallbackDir, 'database.sqlite');
       }
     }
 
-    // Check if database file exists
+    // Check if we can write to the directory
+    try {
+      const testFile = path.join(dbDir, '.write-test');
+      fs.writeFileSync(testFile, '');
+      fs.unlinkSync(testFile);
+      console.log('Write permission test passed');
+    } catch (err) {
+      console.error(`Write permission test failed: ${err.message}`);
+      throw new Error('Cannot write to database directory');
+    }
+
+    // Database initialization
     const dbExists = fs.existsSync(dbPath);
-    console.log(`Database ${dbExists ? 'exists' : 'does not exist'} at ${dbPath}`);
+    console.log(`Database ${dbExists ? 'exists' : 'does not exist'}`);
+
+    await sequelize.authenticate();
+    console.log('Database connection authenticated');
 
     if (!dbExists) {
-      console.log('Database does not exist. Creating and running migrations...');
-      // Create empty file to ensure proper permissions
-      fs.writeFileSync(dbPath, '', { flag: 'w' });
-      if (isRender) {
-        fs.chmodSync(dbPath, '777');
-      }
-      
-      // Force sync to create all tables
+      console.log('Creating new database...');
       await sequelize.sync({ force: true });
+      console.log('Database created successfully');
       return { needsSeeding: true };
-    }
-
-    // Database exists, just authenticate and run migrations
-    try {
-      await sequelize.authenticate();
+    } else {
+      console.log('Running migrations...');
       await sequelize.sync({ alter: true });
-      console.log('Database initialized successfully');
+      console.log('Migrations completed');
       return { needsSeeding: false };
-    } catch (error) {
-      console.error('Error accessing existing database:', error);
-      throw error;
     }
   } catch (error) {
     console.error('Error initializing database:', error);
