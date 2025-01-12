@@ -40,28 +40,22 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser());
 
-app.get('/api/health', (req, res) => {
+app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'success',
     message: 'API is running!'
   });
 });
 
-const isDev = process.env.NODE_ENV === 'development';
+app.use('/auth', authController);
+app.use('/users', userController);
+app.use('/configuration', configurationController);
+app.use('/twitter', twitterController);
+app.use('/webhooks', webhookRouter);
+app.use('/templates', templateController);
+app.use('/mappings', mappingController);
 
-console.log('isDev Env', isDev, "process.env.NODE_ENV" + process.env.NODE_ENV);
-
-const routePrefix = (path) => (isDev ? `/api${path}` : path);
-
-app.use(routePrefix('/auth'), authController);
-app.use(routePrefix('/users'), userController);
-app.use(routePrefix('/configuration'), configurationController);
-app.use(routePrefix('/twitter'), twitterController);
-app.use(routePrefix('/webhooks'), webhookRouter);
-app.use(routePrefix('/templates'), templateController);
-app.use(routePrefix('/mappings'), mappingController);
-
-app.use(routePrefix('/'), eventRouter);
+app.use('/', eventRouter);
 
 app.use(errorMiddleware);
 

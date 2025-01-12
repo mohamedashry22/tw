@@ -2,24 +2,17 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import app from './app.js';
-import sequelize, { initializeDatabase } from './config/database.js';
+import sequelize from './config/database.js';
 import twitterService from './services/twitterService.js';
 import { seedDatabase } from './utils/seedDatabase.js';
 
-const PORT = process.env.PORT || 6000;
+const PORT = process.env.PORT || 5000;
 
 (async () => {
   try {
-    console.log('Starting server initialization...');
-    
-    // Initialize database and check if seeding is needed
-     await initializeDatabase();
+    await sequelize.sync({ force: false });
 
-    // Only seed if the database was newly created
-
-      console.log('New database detected, running seeds...');
-      await seedDatabase();
-
+    await seedDatabase();
 
     await twitterService.initialize();
 
@@ -28,6 +21,5 @@ const PORT = process.env.PORT || 6000;
     });
   } catch (error) {
     console.error('Error during initialization:', error);
-    process.exit(1);
   }
 })();
