@@ -9,4 +9,4 @@ RUN mkdir -p /etc/ssl/private /etc/ssl/certs && \
     -newkey rsa:2048 \
     -keyout /etc/ssl/private/nginx-selfsigned.key \
     -out /etc/ssl/certs/nginx-selfsigned.crt \
-    -subj "/CN=45.32.135.95"
+    -subj "/CN=155.138.196.33"
